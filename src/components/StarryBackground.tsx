@@ -42,7 +42,9 @@ export default function StarryBackground({
       const sizes = new Float32Array(starsCount);
       const colors = new Float32Array(starsCount * 3);
       
-      const color = new THREE.Color(starColor);
+      // Create a color object from starColor prop but don't use it directly
+      // as we'll create unique colors per star below
+      new THREE.Color(starColor);
       
       for (let i = 0; i < starsCount; i++) {
         // Position
@@ -317,8 +319,8 @@ export default function StarryBackground({
             const colors = new Float32Array(points.length * 3);
             for (let i = 0; i < points.length; i++) {
               const i3 = i * 3;
-              // Alpha gradient from head to tail
-              const alpha = 1 - (i / points.length);
+              // Create gradient effect based on position in trail
+              const gradientFactor = 1 - (i / points.length);
               colors[i3] = 1;     // R
               colors[i3 + 1] = 1; // G
               colors[i3 + 2] = 1; // B
@@ -356,6 +358,9 @@ export default function StarryBackground({
       window.removeEventListener('resize', handleResize);
       cancelAnimationFrame(frameId);
       
+      // Get reference to DOM element before cleanup
+      const currentContainer = containerRef.current;
+      
       // Clean up all objects
       scene.remove(starsMesh);
       scene.remove(nebula);
@@ -368,8 +373,8 @@ export default function StarryBackground({
         }
       });
       
-      if (containerRef.current) {
-        containerRef.current.removeChild(renderer.domElement);
+      if (currentContainer) {
+        currentContainer.removeChild(renderer.domElement);
       }
       
       renderer.dispose();

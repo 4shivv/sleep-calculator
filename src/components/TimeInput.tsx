@@ -44,7 +44,7 @@ export default function TimeInput({ label, onTimeChange, placeholder = "12:00 AM
   }, [initialValue]);
 
   // Touch event handlers for swipe gestures
-  const handleTouchStart = (e: React.TouchEvent, type: 'hour' | 'minute') => {
+  const handleTouchStart = (e: React.TouchEvent) => {
     setTouchStartY(e.touches[0].clientY);
   };
 
@@ -282,7 +282,7 @@ export default function TimeInput({ label, onTimeChange, placeholder = "12:00 AM
                   ref={hourRef}
                   className="text-center text-2xl font-bold py-2 text-white w-14 h-14 flex items-center justify-center
                            glow-text time-control"
-                  onTouchStart={(e) => handleTouchStart(e, 'hour')}
+                  onTouchStart={handleTouchStart}
                   onTouchMove={(e) => handleTouchMove(e, 'hour')}
                   onTouchEnd={handleTouchEnd}
                 >
@@ -318,7 +318,7 @@ export default function TimeInput({ label, onTimeChange, placeholder = "12:00 AM
                   ref={minuteRef}
                   className="text-center text-2xl font-bold py-2 text-white w-14 h-14 flex items-center justify-center
                            glow-text time-control"
-                  onTouchStart={(e) => handleTouchStart(e, 'minute')}
+                  onTouchStart={handleTouchStart}
                   onTouchMove={(e) => handleTouchMove(e, 'minute')}
                   onTouchEnd={handleTouchEnd}
                 >

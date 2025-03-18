@@ -71,7 +71,7 @@ export default function Home() {
               <div className="p-4 md:p-5">
                 <h3 className="text-lg font-medium text-violet-300 mb-2">Circadian Rhythm</h3>
                 <p className="text-indigo-200 text-sm">
-                  Your body's internal clock regulates alertness, body temperature, and hormone release. Key points:
+                  Your body&apos;s internal clock regulates alertness, body temperature, and hormone release. Key points:
                 </p>
                 <ul className="mt-2 text-sm text-indigo-200 space-y-1 pl-5 list-disc">
                   <li>Melatonin production increases in the evening</li>

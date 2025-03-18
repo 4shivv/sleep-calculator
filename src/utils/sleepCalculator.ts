@@ -9,6 +9,7 @@ const MINUTES_IN_HOUR = 60;
 const MINUTES_IN_DAY = 24 * MINUTES_IN_HOUR;
 
 // Sleep stages percentages (approximate for healthy adults)
+// Reserved for future implementation of detailed sleep stage analysis
 const SLEEP_STAGES = {
   N1: 0.05, // Stage 1 NREM - 5% of total sleep time
   N2: 0.45, // Stage 2 NREM - 45% of total sleep time
@@ -80,7 +81,7 @@ export function calculateBedtimes(wakeUpTime: Date): string[] {
   // Calculate sleep cycles backward from wake time
   for (let cycles = MAX_SLEEP_CYCLES; cycles >= MIN_SLEEP_CYCLES; cycles--) {
     const totalSleepMinutes = cycles * SLEEP_CYCLE_MINUTES;
-    let bedtimeMinutes = wakeupMinutes - totalSleepMinutes - FALL_ASLEEP_TIME_MINUTES;
+    const bedtimeMinutes = wakeupMinutes - totalSleepMinutes - FALL_ASLEEP_TIME_MINUTES;
     bedtimes.push(minutesToTimeString(bedtimeMinutes));
   }
   
@@ -98,7 +99,7 @@ export function calculateWakeUpTimes(bedTime: Date): string[] {
   // Calculate sleep cycles forward from bed time
   for (let cycles = MIN_SLEEP_CYCLES; cycles <= MAX_SLEEP_CYCLES; cycles++) {
     const totalSleepMinutes = cycles * SLEEP_CYCLE_MINUTES;
-    let wakeUpMinutes = actualSleepStartMinutes + totalSleepMinutes;
+    const wakeUpMinutes = actualSleepStartMinutes + totalSleepMinutes;
     wakeUpTimes.push(minutesToTimeString(wakeUpMinutes));
   }
   
