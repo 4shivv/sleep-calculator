@@ -20,6 +20,11 @@ const crimsonPro = Crimson_Pro({
 export const metadata: Metadata = {
   title: "Sleep Cycle Calculator | Optimize Your Sleep and Productivity",
   description: "Scientific sleep cycle calculator to optimize your sleep schedule, productivity, and deep work times based on your chronotype and circadian rhythm.",
+  icons: {
+    icon: '/favicon.png',
+    apple: '/favicon.png',
+    shortcut: '/favicon.png'
+  },
   keywords: [
     "sleep calculator", 
     "sleep cycle", 
