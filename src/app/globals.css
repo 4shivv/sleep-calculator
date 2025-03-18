@@ -1,26 +1,298 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #050a24;
+  --foreground: #ffffff;
+  --primary: #8b5cf6;
+  --primary-light: #a78bfa;
+  --accent: #06b6d4;
+  --accent-light: #67e8f9;
+  --card-bg: rgba(15, 23, 42, 0.7);
+  --card-border: rgba(100, 116, 139, 0.2);
+  --card-hover: rgba(30, 41, 59, 0.8);
+  --animation-duration: 0.3s;
+  --animation-timing: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-sans: var(--font-space-grotesk);
+  --font-serif: var(--font-crimson-pro);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans, sans-serif);
+}
+
+/* Cosmic theme */
+.cosmic-theme {
+  --tw-shadow-color: rgba(139, 92, 246, 0.3);
+  --tw-ring-color: rgba(139, 92, 246, 0.5);
+}
+
+/* Custom gradients */
+.bg-gradient-radial-subtle {
+  background-image: radial-gradient(var(--tw-gradient-stops));
+}
+
+.bg-gradient-cosmic {
+  background-image: linear-gradient(to bottom right, #3b82f6, #8b5cf6, #d946ef);
+}
+
+.text-gradient-cosmic {
+  background: linear-gradient(to right, #a78bfa, #60a5fa, #67e8f9);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.border-gradient-cosmic {
+  border-image: linear-gradient(to right, #a78bfa, #60a5fa, #67e8f9) 1;
+}
+
+/* Card with glass effect */
+.card-cosmic {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: all 0.3s ease;
+}
+
+.card-cosmic:hover {
+  background: var(--card-hover);
+  box-shadow: 0 8px 20px -4px rgba(139, 92, 246, 0.3);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideInUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+@keyframes twinkle {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+/* Animation delays */
+.animation-delay-200 {
+  animation-delay: 0.2s;
+}
+
+.animation-delay-500 {
+  animation-delay: 0.5s;
+}
+
+/* Apply animations */
+.animate-fadeIn {
+  animation: fadeIn var(--animation-duration) var(--animation-timing);
+}
+
+.animate-slideInUp {
+  animation: slideInUp var(--animation-duration) var(--animation-timing);
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-twinkle {
+  animation: twinkle 3s ease-in-out infinite;
+}
+
+/* Enhanced responsiveness */
+@media (max-width: 640px) {
+  html {
+    font-size: 14px;
+  }
+  
+  .hide-on-mobile {
+    display: none;
+  }
+  
+  .mobile-full-width {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  
+  .mobile-padding {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+  
+  .mobile-small-text {
+    font-size: 0.875rem !important;
+  }
+  
+  .mobile-stack {
+    flex-direction: column !important;
+  }
+  
+  .mobile-center {
+    text-align: center !important;
+    justify-content: center !important;
+  }
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #14214b;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #5b52a3;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #8b5cf6;
+}
+
+/* Focus styling */
+*:focus-visible {
+  outline: 2px solid #8b5cf6;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Class for staggered animations */
+.staggered-item {
+  opacity: 0;
+  animation: slideInUp var(--animation-duration) var(--animation-timing) forwards;
+}
+
+.staggered-item:nth-child(1) { animation-delay: 0.1s; }
+.staggered-item:nth-child(2) { animation-delay: 0.2s; }
+.staggered-item:nth-child(3) { animation-delay: 0.3s; }
+.staggered-item:nth-child(4) { animation-delay: 0.4s; }
+.staggered-item:nth-child(5) { animation-delay: 0.5s; }
+
+/* Custom Scrollbar for Select Dropdowns */
+select::-webkit-scrollbar {
+  width: 6px;
+}
+
+select::-webkit-scrollbar-track {
+  background: #14214b;
+}
+
+select::-webkit-scrollbar-thumb {
+  background: #5b52a3;
+  border-radius: 4px;
+}
+
+select::-webkit-scrollbar-thumb:hover {
+  background: #8b5cf6;
+}
+
+/* Remove arrow from number inputs */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+/* Bottom Sheet for Mobile */
+.bottom-sheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  transform: translateY(100%);
+  transition: transform 0.3s ease-in-out;
+  z-index: 50;
+  border-top-left-radius: 1rem;
+  border-top-right-radius: 1rem;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.bottom-sheet.open {
+  transform: translateY(0);
+}
+
+/* Styles for mobile viewport */
+@media (max-width: 640px) {
+  .card-shadow-mobile {
+    box-shadow: 0 1px 3px rgba(139, 92, 246, 0.3);
+  }
+  
+  .time-input-mobile {
+    font-size: 16px; /* Prevent zoom on iOS */
+  }
+  
+  .result-item-mobile {
+    padding: 0.75rem !important;
+  }
+}
+
+/* For better touch targets on mobile */
+@media (max-width: 640px) {
+  button, 
+  [role="button"],
+  input,
+  select,
+  a {
+    min-height: 44px; /* Apple's recommended minimum size */
+  }
+  
+  .touch-target {
+    padding: 0.75rem !important;
+  }
+}
+
+/* Glow effects */
+.glow-text {
+  text-shadow: 0 0 8px rgba(99, 102, 241, 0.6);
+}
+
+.glow-border {
+  box-shadow: 0 0 15px rgba(139, 92, 246, 0.4);
+}
+
+.glow-icon {
+  filter: drop-shadow(0 0 6px rgba(139, 92, 246, 0.6));
 }
