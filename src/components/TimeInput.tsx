@@ -262,7 +262,7 @@ export default function TimeInput({ label, onTimeChange, placeholder = "12:00 AM
         {showTimePicker && (
           <div 
             ref={timePickerRef}
-            className="absolute z-20 mt-2 bg-indigo-950/90 backdrop-blur-xl border-2 border-violet-500/40 rounded-xl shadow-lg p-4 
+            className="absolute z-50 mt-2 bg-indigo-950/90 backdrop-blur-xl border-2 border-violet-500/40 rounded-xl shadow-lg p-4 
                      sm:p-5 w-full max-w-sm animate-fadeIn overflow-hidden time-picker-cosmic"
           >
             <div className="flex justify-center items-center space-x-4 relative py-3">
