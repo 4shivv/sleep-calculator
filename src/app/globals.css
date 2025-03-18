@@ -286,13 +286,191 @@ input[type="number"] {
 
 /* Glow effects */
 .glow-text {
-  text-shadow: 0 0 8px rgba(99, 102, 241, 0.6);
+  text-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
 }
 
 .glow-border {
-  box-shadow: 0 0 15px rgba(139, 92, 246, 0.4);
+  box-shadow: 0 0 15px -3px rgba(139, 92, 246, 0.4);
 }
 
 .glow-icon {
-  filter: drop-shadow(0 0 6px rgba(139, 92, 246, 0.6));
+  filter: drop-shadow(0 0 3px rgba(139, 92, 246, 0.5));
+}
+
+/* Enhanced input placeholder styling */
+::placeholder {
+  color: rgba(165, 180, 252, 0.4);
+  opacity: 1;
+}
+
+/* Time picker specific enhancements */
+.time-picker-cosmic {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background-color: rgba(16, 24, 64, 0.85);
+  border: 2px solid rgba(139, 92, 246, 0.3);
+  box-shadow: 0 8px 32px rgba(5, 10, 36, 0.3);
+}
+
+/* Prevent text selection on time controls */
+.time-control {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Smooth transitions for time controls */
+.time-transition {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Enhanced touch targets for mobile */
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+@media (max-width: 640px) {
+  button, 
+  input,
+  select,
+  .touch-target {
+    min-height: 44px;
+    font-size: 16px !important; /* Prevent iOS zoom on focus */
+  }
+  
+  /* Time input mobile improvements */
+  .time-input-mobile {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+}
+
+/* Sleep Calculator specific styles */
+.sleep-calculator-container {
+  @apply max-w-3xl mx-auto;
+  background: linear-gradient(180deg, rgba(5, 10, 36, 0.8) 0%, rgba(15, 23, 42, 0.9) 100%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.calculation-type-selector {
+  @apply flex justify-center mb-2;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.calculation-type-button {
+  @apply px-3 md:px-4 py-2.5 rounded-lg font-medium text-sm flex-1 transition-colors flex items-center justify-center space-x-1 md:space-x-2 whitespace-nowrap;
+  background: rgba(139, 92, 246, 0.1);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+.calculation-type-button.active {
+  background: rgba(139, 92, 246, 0.3);
+  border-color: rgba(139, 92, 246, 0.4);
+  box-shadow: 0 0 15px rgba(139, 92, 246, 0.2);
+}
+
+.calculation-type-button:not(.active):hover {
+  background: rgba(139, 92, 246, 0.15);
+  border-color: rgba(139, 92, 246, 0.3);
+}
+
+/* Sleep Results specific styles */
+.sleep-results-card {
+  @apply rounded-xl border overflow-hidden mb-6 transition-all duration-300 ease-in-out;
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.sleep-results-header {
+  @apply px-5 py-4 flex items-center justify-between cursor-pointer;
+  background: rgba(139, 92, 246, 0.05);
+  border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+}
+
+.sleep-results-title {
+  @apply font-semibold text-lg;
+  background: linear-gradient(90deg, #a78bfa, #60a5fa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.sleep-results-item {
+  @apply py-3 px-4 rounded-lg border shadow-sm flex flex-col md:flex-row md:items-center md:justify-between;
+  background: rgba(15, 23, 42, 0.5);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  transition: all 0.2s ease-in-out;
+}
+
+.sleep-results-item:hover {
+  background: rgba(139, 92, 246, 0.1);
+  border-color: rgba(139, 92, 246, 0.3);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.1);
+}
+
+.sleep-results-badge {
+  @apply text-xs px-2 py-1 rounded-md inline-flex items-center;
+  background: rgba(139, 92, 246, 0.15);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  color: #a78bfa;
+}
+
+.sleep-results-select-button {
+  @apply text-xs md:text-sm px-3 py-1.5 rounded-md transition-colors;
+  background: rgba(139, 92, 246, 0.2);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  color: #a78bfa;
+}
+
+.sleep-results-select-button:hover {
+  background: rgba(139, 92, 246, 0.3);
+  border-color: rgba(139, 92, 246, 0.4);
+}
+
+/* Chronotype selector styles */
+.chronotype-selector {
+  @apply grid grid-cols-1 sm:grid-cols-3 gap-2;
+}
+
+.chronotype-button {
+  @apply py-2.5 md:py-3 px-4 rounded-lg border text-center text-sm transition-all;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+.chronotype-button.active {
+  background: rgba(139, 92, 246, 0.2);
+  border-color: rgba(139, 92, 246, 0.4);
+  box-shadow: 0 0 15px rgba(139, 92, 246, 0.2);
+}
+
+.chronotype-button:not(.active):hover {
+  background: rgba(139, 92, 246, 0.1);
+  border-color: rgba(139, 92, 246, 0.3);
+}
+
+/* Loading animation */
+.loading-dots {
+  @apply flex space-x-3;
+}
+
+.loading-dot {
+  @apply h-3 w-3 rounded-full;
+  background: rgba(139, 92, 246, 0.6);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.loading-dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.loading-dot:nth-child(3) {
+  animation-delay: 0.4s;
 }

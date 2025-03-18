@@ -242,17 +242,15 @@ export default function SleepCalculator() {
     : '';
   
   return (
-    <div className="max-w-3xl mx-auto">
+    <div className="sleep-calculator-container">
       <div className="flex flex-col gap-4 md:gap-6">
         {/* Calculator Type Selector */}
-        <div className="flex justify-center mb-2">
+        <div className="calculation-type-selector">
           <div className="card-cosmic p-1.5 rounded-xl shadow-sm inline-flex border-violet-500/20 w-full max-w-md overflow-x-auto glow-border">
             <button
               onClick={() => handleTypeChange('wakeToBed')}
-              className={`px-3 md:px-4 py-2.5 rounded-lg font-medium text-sm flex-1 transition-colors flex items-center justify-center space-x-1 md:space-x-2 whitespace-nowrap ${
-                calculationType === 'wakeToBed' 
-                  ? 'bg-violet-600 text-white shadow-sm' 
-                  : 'text-indigo-200 hover:bg-indigo-900/40'
+              className={`calculation-type-button ${
+                calculationType === 'wakeToBed' ? 'active' : ''
               }`}
             >
               <Icons.Wake />
@@ -260,10 +258,8 @@ export default function SleepCalculator() {
             </button>
             <button
               onClick={() => handleTypeChange('bedToWake')}
-              className={`px-3 md:px-4 py-2.5 rounded-lg font-medium text-sm flex-1 transition-colors flex items-center justify-center space-x-1 md:space-x-2 whitespace-nowrap ${
-                calculationType === 'bedToWake' 
-                  ? 'bg-violet-600 text-white shadow-sm' 
-                  : 'text-indigo-200 hover:bg-indigo-900/40'
+              className={`calculation-type-button ${
+                calculationType === 'bedToWake' ? 'active' : ''
               }`}
             >
               <Icons.Bed />
@@ -281,16 +277,14 @@ export default function SleepCalculator() {
               <label className="block text-sm font-medium mb-1.5 text-indigo-200">
                 Your Chronotype (Sleep-Wake Tendency)
               </label>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <div className="chronotype-selector">
                 {(['early', 'intermediate', 'late'] as const).map((type) => (
                   <button
                     key={type}
                     onClick={() => setChronotype(type)}
-                    className={`py-2.5 md:py-3 px-4 rounded-lg border text-center text-sm transition-all
-                      ${chronotype === type 
-                        ? 'border-violet-500 bg-violet-900/30 text-violet-300 shadow-sm' 
-                        : 'border-indigo-500/20 bg-indigo-900/20 text-indigo-200 hover:border-indigo-500/40 hover:bg-indigo-900/30'
-                      }`}
+                    className={`chronotype-button ${
+                      chronotype === type ? 'active' : ''
+                    }`}
                   >
                     {type === 'early' && "Early Bird (Morning Lark)"}
                     {type === 'intermediate' && "Intermediate"}
@@ -327,10 +321,10 @@ export default function SleepCalculator() {
         {/* Loading indicator */}
         {loading && (
           <div className="flex justify-center py-8">
-            <div className="animate-pulse flex space-x-3">
-              <div className="h-3 w-3 bg-violet-400 rounded-full"></div>
-              <div className="h-3 w-3 bg-violet-400 rounded-full animation-delay-200"></div>
-              <div className="h-3 w-3 bg-violet-400 rounded-full animation-delay-500"></div>
+            <div className="loading-dots">
+              <div className="loading-dot"></div>
+              <div className="loading-dot"></div>
+              <div className="loading-dot"></div>
             </div>
           </div>
         )}

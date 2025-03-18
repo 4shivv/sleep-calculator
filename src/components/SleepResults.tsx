@@ -75,25 +75,25 @@ export default function SleepResults({
   const colors = accentColors[accent as keyof typeof accentColors] || accentColors.blue;
   
   return (
-    <div className={`rounded-xl border ${colors.border} ${colors.card} overflow-hidden mb-6 transition-all duration-300 ease-in-out`}>
+    <div className={`sleep-results-card ${colors.border}`}>
       <div 
-        className="px-5 py-4 flex items-center justify-between cursor-pointer"
+        className="sleep-results-header"
         onClick={() => setExpanded(!expanded)}
       >
         <div className="flex items-center space-x-3">
-          {icon && <span className="text-xl">{icon}</span>}
-          <h3 className={`font-semibold text-lg ${colors.title}`}>
+          {icon && <span className="text-xl glow-icon">{icon}</span>}
+          <h3 className="sleep-results-title">
             {title}
           </h3>
         </div>
         
         <button 
-          className="p-1 rounded-full hover:bg-gray-200/50 dark:hover:bg-gray-700/50 transition-colors"
+          className="p-1 rounded-full hover:bg-violet-500/10 transition-colors"
           aria-label={expanded ? "Collapse" : "Expand"}
         >
           <svg 
             xmlns="http://www.w3.org/2000/svg" 
-            className={`h-5 w-5 text-gray-500 dark:text-gray-400 transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`} 
+            className={`h-5 w-5 text-violet-300 transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`} 
             fill="none" 
             viewBox="0 0 24 24" 
             stroke="currentColor"
@@ -106,7 +106,7 @@ export default function SleepResults({
       {expanded && (
         <div className="px-5 pb-5">
           {description && (
-            <p className="text-gray-600 dark:text-gray-300 mb-4 text-sm">
+            <p className="text-indigo-200 mb-4 text-sm">
               {description}
             </p>
           )}
@@ -115,18 +115,18 @@ export default function SleepResults({
             {items.map((item, index) => (
               <li 
                 key={index}
-                className={`py-3 px-4 rounded-lg border ${colors.item} shadow-sm
-                  ${onSelect ? 'cursor-pointer hover:shadow-md transition-shadow' : ''} 
-                  flex flex-col md:flex-row md:items-center md:justify-between`}
+                className={`sleep-results-item ${
+                  onSelect ? 'cursor-pointer' : ''
+                }`}
                 onClick={() => onSelect && onSelect(item)}
               >
                 <div className="flex flex-col">
-                  <span className="text-gray-800 dark:text-gray-200 font-medium mb-1 md:mb-0">{item}</span>
+                  <span className="text-violet-100 font-medium mb-1 md:mb-0">{item}</span>
                   
                   {(sleepDurations.length > 0 || cycles.length > 0) && (
                     <div className="flex flex-wrap gap-2 mt-1.5 mb-2 md:mb-0">
                       {sleepDurations[index] && (
-                        <span className={`text-xs px-2 py-1 rounded-md ${colors.badge} inline-flex items-center`}>
+                        <span className="sleep-results-badge">
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                           </svg>
@@ -135,7 +135,7 @@ export default function SleepResults({
                       )}
                       
                       {cycles[index] && (
-                        <span className={`text-xs px-2 py-1 rounded-md ${colors.badge} inline-flex items-center`}>
+                        <span className="sleep-results-badge">
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                           </svg>
@@ -148,7 +148,7 @@ export default function SleepResults({
                 
                 {onSelect && (
                   <button 
-                    className={`text-xs md:text-sm px-3 py-1.5 rounded-md ${colors.button} transition-colors mt-2 md:mt-0`}
+                    className="sleep-results-select-button"
                     onClick={(e) => {
                       e.stopPropagation();
                       onSelect(item);
