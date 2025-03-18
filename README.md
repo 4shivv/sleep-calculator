@@ -1,6 +1,12 @@
 # Sleep Cycle Calculator
 
+Deployed to https://sleep-calculator-rose.vercel.app/
+
 A scientific web application that helps users optimize their sleep schedule and daily productivity by aligning with natural sleep cycles and circadian rhythms.
+
+## Project Overview
+
+The Sleep Cycle Calculator is designed to provide users with personalized sleep and productivity recommendations based on scientific research. It aims to enhance users' daily performance by aligning their activities with their natural biological rhythms.
 
 ## Features
 
