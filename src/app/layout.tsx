@@ -4,7 +4,6 @@ import "@fontsource-variable/space-grotesk";
 import "@fontsource-variable/crimson-pro";
 import "./globals.css";
 import StarryBackground from "../components/StarryBackground";
-import ShootingStars from "../components/ShootingStars";
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
@@ -71,8 +70,12 @@ export default function RootLayout({
       <body
         className={`${spaceGrotesk.variable} ${crimsonPro.variable} antialiased transition-colors duration-300 cosmic-theme`}
       >
-        <StarryBackground starsCount={2000} backgroundColor="#050a24" />
-        <ShootingStars count={10} speed={8} />
+        <StarryBackground 
+          starsCount={2000} 
+          backgroundColor="#050a24" 
+          shootingStarsCount={15} 
+          shootingStarSpeed={0.8} 
+        />
         <div className="bg-gradient-radial-subtle from-indigo-950/20 to-black/80 min-h-screen">
           {children}
         </div>

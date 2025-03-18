@@ -24,32 +24,32 @@ type ChronotypeOption = Chronotype | 'unknown';
 // Icons for different sections
 const Icons = {
   Bed: () => (
-    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 glow-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
     </svg>
   ),
   Wake: () => (
-    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 glow-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
     </svg>
   ),
   Work: () => (
-    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 glow-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
     </svg>
   ),
   Slump: () => (
-    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 glow-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
     </svg>
   ),
   Nap: () => (
-    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 glow-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
     </svg>
   ),
   Chronotype: () => (
-    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 glow-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
     </svg>
   )
@@ -246,13 +246,13 @@ export default function SleepCalculator() {
       <div className="flex flex-col gap-4 md:gap-6">
         {/* Calculator Type Selector */}
         <div className="flex justify-center mb-2">
-          <div className="bg-white dark:bg-gray-800 p-1.5 rounded-xl shadow-sm inline-flex border border-gray-200 dark:border-gray-700 w-full max-w-md overflow-x-auto">
+          <div className="card-cosmic p-1.5 rounded-xl shadow-sm inline-flex border-violet-500/20 w-full max-w-md overflow-x-auto glow-border">
             <button
               onClick={() => handleTypeChange('wakeToBed')}
               className={`px-3 md:px-4 py-2.5 rounded-lg font-medium text-sm flex-1 transition-colors flex items-center justify-center space-x-1 md:space-x-2 whitespace-nowrap ${
                 calculationType === 'wakeToBed' 
-                  ? 'bg-blue-500 text-white shadow-sm' 
-                  : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                  ? 'bg-violet-600 text-white shadow-sm' 
+                  : 'text-indigo-200 hover:bg-indigo-900/40'
               }`}
             >
               <Icons.Wake />
@@ -262,8 +262,8 @@ export default function SleepCalculator() {
               onClick={() => handleTypeChange('bedToWake')}
               className={`px-3 md:px-4 py-2.5 rounded-lg font-medium text-sm flex-1 transition-colors flex items-center justify-center space-x-1 md:space-x-2 whitespace-nowrap ${
                 calculationType === 'bedToWake' 
-                  ? 'bg-blue-500 text-white shadow-sm' 
-                  : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                  ? 'bg-violet-600 text-white shadow-sm' 
+                  : 'text-indigo-200 hover:bg-indigo-900/40'
               }`}
             >
               <Icons.Bed />
@@ -273,12 +273,12 @@ export default function SleepCalculator() {
         </div>
         
         {/* Personal profile */}
-        <div className="bg-white dark:bg-gray-800 p-4 md:p-5 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
-          <h3 className="text-lg font-medium text-gray-800 dark:text-white mb-3 md:mb-4">Personal Sleep Profile</h3>
+        <div className="card-cosmic p-4 md:p-5 rounded-xl shadow-sm border-violet-500/20">
+          <h3 className="text-lg font-medium text-violet-300 mb-3 md:mb-4 glow-text">Personal Sleep Profile</h3>
           
           <div className="flex flex-col space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-1.5 text-gray-700 dark:text-gray-300">
+              <label className="block text-sm font-medium mb-1.5 text-indigo-200">
                 Your Chronotype (Sleep-Wake Tendency)
               </label>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
@@ -288,8 +288,8 @@ export default function SleepCalculator() {
                     onClick={() => setChronotype(type)}
                     className={`py-2.5 md:py-3 px-4 rounded-lg border text-center text-sm transition-all
                       ${chronotype === type 
-                        ? 'border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:border-blue-800 dark:text-blue-300 shadow-sm' 
-                        : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-gray-600'
+                        ? 'border-violet-500 bg-violet-900/30 text-violet-300 shadow-sm' 
+                        : 'border-indigo-500/20 bg-indigo-900/20 text-indigo-200 hover:border-indigo-500/40 hover:bg-indigo-900/30'
                       }`}
                   >
                     {type === 'early' && "Early Bird (Morning Lark)"}
@@ -299,8 +299,8 @@ export default function SleepCalculator() {
                 ))}
               </div>
               {chronotypeRecommendation && (
-                <p className="mt-3 text-sm text-gray-600 dark:text-gray-400">
-                  <span className="font-medium">Recommendation:</span> {chronotypeRecommendation}
+                <p className="mt-3 text-sm text-indigo-300">
+                  <span className="font-medium text-violet-300">Recommendation:</span> {chronotypeRecommendation}
                 </p>
               )}
             </div>
@@ -308,7 +308,7 @@ export default function SleepCalculator() {
         </div>
         
         {/* Time Input Section */}
-        <div className="bg-white dark:bg-gray-800 p-4 md:p-5 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+        <div className="card-cosmic p-4 md:p-5 rounded-xl shadow-sm border-violet-500/20">
           {calculationType === 'wakeToBed' ? (
             <TimeInput 
               label="What time do you want to wake up?" 
@@ -328,9 +328,9 @@ export default function SleepCalculator() {
         {loading && (
           <div className="flex justify-center py-8">
             <div className="animate-pulse flex space-x-3">
-              <div className="h-3 w-3 bg-blue-400 rounded-full"></div>
-              <div className="h-3 w-3 bg-blue-400 rounded-full animation-delay-200"></div>
-              <div className="h-3 w-3 bg-blue-400 rounded-full animation-delay-500"></div>
+              <div className="h-3 w-3 bg-violet-400 rounded-full"></div>
+              <div className="h-3 w-3 bg-violet-400 rounded-full animation-delay-200"></div>
+              <div className="h-3 w-3 bg-violet-400 rounded-full animation-delay-500"></div>
             </div>
           </div>
         )}
@@ -345,7 +345,7 @@ export default function SleepCalculator() {
                 items={bedtimes}
                 description="Go to bed at one of these times for optimal sleep cycles and to wake up feeling refreshed."
                 icon={<Icons.Bed />}
-                accent="blue"
+                accent="violet"
                 sleepDurations={sleepDurations}
                 cycles={sleepCycles}
               />
@@ -358,7 +358,7 @@ export default function SleepCalculator() {
                 items={wakeUpTimes}
                 description={bestWakeUpTime ? `The best wake-up time is ${bestWakeUpTime} (aligns with both sleep cycles and natural light).` : ''}
                 icon={<Icons.Wake />}
-                accent="green"
+                accent="indigo"
                 onSelect={handleWakeTimeSelect}
                 sleepDurations={wakeUpSleepDurations}
                 cycles={wakeUpSleepCycles}
@@ -383,7 +383,7 @@ export default function SleepCalculator() {
                 items={[afternoonSlump]}
                 description="This is when your body naturally experiences an energy dip. Consider a short nap or lighter tasks during this period."
                 icon={<Icons.Slump />}
-                accent="amber"
+                accent="blue"
               />
             )}
             
@@ -394,7 +394,7 @@ export default function SleepCalculator() {
                 items={[napTime]}
                 description={`Recommended nap duration: ${napDuration}`}
                 icon={<Icons.Nap />}
-                accent="red"
+                accent="cyan"
               />
             )}
           </div>

@@ -1,7 +1,7 @@
 // Sleep cycle constants based on scientific research
 const SLEEP_CYCLE_MINUTES = 90; // One complete sleep cycle (NREM + REM) lasts approximately 90 minutes
 const FALL_ASLEEP_TIME_MINUTES = 14; // Average time to fall asleep for healthy adults
-const MIN_SLEEP_CYCLES = 4; // Minimum recommended complete sleep cycles
+const MIN_SLEEP_CYCLES = 3; // Minimum recommended complete sleep cycles
 const MAX_SLEEP_CYCLES = 6; // Maximum recommended complete sleep cycles
 
 // Time constants (in minutes)
