@@ -10,6 +10,7 @@ const MINUTES_IN_DAY = 24 * MINUTES_IN_HOUR;
 
 // Sleep stages percentages (approximate for healthy adults)
 // Reserved for future implementation of detailed sleep stage analysis
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const SLEEP_STAGES = {
   N1: 0.05, // Stage 1 NREM - 5% of total sleep time
   N2: 0.45, // Stage 2 NREM - 45% of total sleep time

@@ -9,7 +9,8 @@ import {
   calculateDeepWorkPeriods,
   calculateAfternoonSlump,
   calculateNapTime,
-  getRecommendedSleepDuration, // imported for future use
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  getRecommendedSleepDuration,
   getBestWakeTime,
   getIdealNapDuration,
   Chronotype,

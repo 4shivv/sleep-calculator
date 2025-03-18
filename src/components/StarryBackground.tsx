@@ -321,9 +321,11 @@ export default function StarryBackground({
               const i3 = i * 3;
               // Create gradient effect based on position in trail
               const gradientFactor = 1 - (i / points.length);
-              colors[i3] = 1;     // R
-              colors[i3 + 1] = 1; // G
-              colors[i3 + 2] = 1; // B
+              // Apply gradient effect to colors (could adjust opacity or brightness)
+              const brightness = gradientFactor * 0.7 + 0.3;
+              colors[i3] = brightness;     // R
+              colors[i3 + 1] = brightness; // G
+              colors[i3 + 2] = brightness; // B
             }
             
             geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
