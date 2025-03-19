@@ -23,6 +23,9 @@ export default function StarryBackground({
   useEffect(() => {
     if (!containerRef.current) return;
 
+    // Store a reference to the current container element
+    const currentContainer = containerRef.current;
+
     // Setup scene
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -360,21 +363,7 @@ export default function StarryBackground({
       window.removeEventListener('resize', handleResize);
       cancelAnimationFrame(frameId);
       
-      // Get reference to DOM element before cleanup
-      const currentContainer = containerRef.current;
-      
-      // Clean up all objects
-      scene.remove(starsMesh);
-      scene.remove(nebula);
-      
-      // Clean up shooting stars
-      shootingStars.forEach(star => {
-        if (star.trailLine) {
-          scene.remove(star.trailLine);
-          star.trailLine.geometry.dispose();
-        }
-      });
-      
+      // Use the stored reference in the cleanup function
       if (currentContainer) {
         currentContainer.removeChild(renderer.domElement);
       }

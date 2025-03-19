@@ -18,7 +18,7 @@ export default function SleepResults({
   items, 
   description, 
   icon, 
-  accent = 'blue', 
+  accent: _,
   onSelect,
   sleepDurations = [],
   cycles = []
