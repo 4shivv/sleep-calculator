@@ -244,10 +244,10 @@ export default function SleepCalculator() {
   
   return (
     <div className="sleep-calculator-container">
-      <div className="flex flex-col gap-4 md:gap-6">
+      <div className="flex flex-col gap-4">
         {/* Calculator Type Selector */}
         <div className="calculation-type-selector">
-          <div className="card-cosmic p-1.5 rounded-xl shadow-sm inline-flex border-violet-500/20 w-full max-w-md overflow-x-auto glow-border">
+          <div className="inline-flex border-violet-500/20 w-full max-w-md overflow-x-auto glow-border">
             <button
               onClick={() => handleTypeChange('wakeToBed')}
               className={`calculation-type-button ${
@@ -270,12 +270,12 @@ export default function SleepCalculator() {
         </div>
         
         {/* Personal profile */}
-        <div className="card-cosmic p-4 md:p-5 rounded-xl shadow-sm border-violet-500/20">
-          <h3 className="text-lg font-medium text-violet-300 mb-3 md:mb-4 glow-text">Personal Sleep Profile</h3>
+        <div className="card-cosmic">
+          <h3 className="text-violet-300 mb-3 md:mb-4 glow-text font-medium">Personal Sleep Profile</h3>
           
           <div className="flex flex-col space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-1.5 text-indigo-200">
+              <label className="block text-sm font-medium mb-2 text-indigo-200">
                 Your Chronotype (Sleep-Wake Tendency)
               </label>
               <div className="chronotype-selector">
@@ -303,7 +303,7 @@ export default function SleepCalculator() {
         </div>
         
         {/* Time Input Section */}
-        <div className="card-cosmic p-4 md:p-5 rounded-xl shadow-sm border-violet-500/20">
+        <div className="card-cosmic">
           {calculationType === 'wakeToBed' ? (
             <TimeInput 
               label="What time do you want to wake up?" 
@@ -321,12 +321,10 @@ export default function SleepCalculator() {
         
         {/* Loading indicator */}
         {loading && (
-          <div className="flex justify-center py-8">
-            <div className="loading-dots">
-              <div className="loading-dot"></div>
-              <div className="loading-dot"></div>
-              <div className="loading-dot"></div>
-            </div>
+          <div className="loading-dots">
+            <div className="loading-dot"></div>
+            <div className="loading-dot"></div>
+            <div className="loading-dot"></div>
           </div>
         )}
         
@@ -397,4 +395,4 @@ export default function SleepCalculator() {
       </div>
     </div>
   );
-} 
+}

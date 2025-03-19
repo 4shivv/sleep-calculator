@@ -206,76 +206,83 @@ export default function TimeInput({ label, onTimeChange, placeholder = "12:00 AM
   };
 
   return (
-    <div className="w-full">
-      <label className="block text-base font-medium mb-2 text-indigo-200 glow-text">
+    <div className="time-input-container w-full">
+      <label className="block font-medium text-indigo-200 glow-text mb-2">
         {label}
       </label>
       
-      {/* Container that will expand to fit the time picker */}
-      <div className={`relative ${showTimePicker ? 'pb-[450px] sm:pb-[400px]' : ''} transition-all duration-300`}>
-        <div className="flex flex-col sm:flex-row gap-2 time-input-mobile">
-          <div className="relative flex-grow">
-            <input
-              ref={inputRef}
-              type="text"
-              value={timeString}
-              onChange={handleTimeChange}
-              onFocus={() => {
-                setIsFocused(true);
-                setShowTimePicker(true);
-              }}
-              onBlur={() => setIsFocused(false)}
-              placeholder={placeholder}
-              className={`w-full px-4 py-3.5 border-2 rounded-xl text-lg md:text-xl font-medium focus:outline-none transition-all duration-200 
-                ${error ? 'border-red-500' : isFocused ? 'border-violet-500 glow-border' : 'border-violet-500/30'} 
-                bg-indigo-950/40 backdrop-blur-md text-white placeholder-indigo-300/70 tracking-wide`}
-            />
-            
-            <button 
-              type="button"
-              onClick={() => setShowTimePicker(!showTimePicker)}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-indigo-300 hover:text-violet-300 focus:outline-none touch-target p-2"
-              aria-label="Open time picker"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </button>
-          </div>
+      {/* Time input row */}
+      <div className="time-input-row">
+        <div className="relative w-full">
+          <input
+            ref={inputRef}
+            type="text"
+            value={timeString}
+            onChange={handleTimeChange}
+            onFocus={() => {
+              setIsFocused(true);
+              setShowTimePicker(true);
+            }}
+            onBlur={() => setIsFocused(false)}
+            placeholder={placeholder}
+            className={`time-input w-full ${error ? 'border-red-500' : isFocused ? 'border-violet-500 glow-border' : 'border-violet-500/30'} 
+              bg-indigo-950/40 backdrop-blur-md text-white placeholder-indigo-300/70`}
+          />
           
+          <button 
+            type="button"
+            onClick={() => setShowTimePicker(!showTimePicker)}
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-indigo-300 hover:text-violet-300 focus:outline-none p-2"
+            aria-label="Open time picker"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </button>
+        </div>
+        
+        <div className="now-button-container mt-2 sm:mt-0">
           <button
             type="button"
             onClick={setCurrentTime}
-            className="px-4 py-3.5 bg-violet-600/20 hover:bg-violet-600/30 text-violet-300 font-medium rounded-xl transition-colors 
-                    border-2 border-violet-500/40 flex items-center justify-center whitespace-nowrap touch-target 
-                    sm:w-auto w-full backdrop-blur-md text-lg"
+            className="btn-secondary px-4 py-3 w-full sm:w-auto flex items-center justify-center gap-2"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             Now
           </button>
         </div>
-        
-        {error && <p className="mt-1.5 text-sm text-red-400">{error}</p>}
-        
-        {/* Time picker dropdown - Styled to stay within the parent, but visible */}
+      </div>
+      
+      {error && <p className="text-xs text-red-400 mt-1.5">{error}</p>}
+      
+      {/* Time picker dropdown container with fixed height and proper spacing */}
+      <div 
+        className={`time-picker-container relative ${showTimePicker ? 'active' : ''}`}
+        style={{
+          height: showTimePicker ? 'auto' : 0,
+          marginBottom: showTimePicker ? '450px' : 0, // This creates space below
+          overflow: 'visible',
+          transition: 'margin-bottom 0.3s ease'
+        }}
+      >
+        {/* Time picker dropdown that's positioned absolutely */}
         {showTimePicker && (
           <div 
             ref={timePickerRef}
             className="absolute left-0 right-0 mt-2 z-50"
+            style={{ top: 0 }}
           >
-            <div 
-              className="bg-indigo-950/95 backdrop-blur-xl border-2 border-violet-500/40 rounded-xl shadow-lg p-4 
-                       sm:p-5 w-full animate-fadeIn overflow-hidden time-picker-cosmic"
-            >
-              <div className="flex justify-center items-center space-x-4 relative py-3">
+            <div className="time-picker-cosmic animate-fadeIn">
+              {/* Time selector */}
+              <div className="flex justify-center items-center gap-4 py-3">
                 {/* Hour selector */}
                 <div className="flex flex-col items-center">
                   <button 
                     onClick={() => handleHourChange(1)}
-                    className="p-2 text-violet-300 hover:text-white focus:outline-none touch-target w-12 h-12 
-                             flex items-center justify-center transition-all hover:bg-violet-500/20 rounded-full time-transition"
+                    className="p-2 text-violet-300 hover:text-white focus:outline-none w-12 h-12 
+                             flex items-center justify-center transition-all hover:bg-violet-500/20 rounded-full"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
@@ -284,8 +291,7 @@ export default function TimeInput({ label, onTimeChange, placeholder = "12:00 AM
                   
                   <div 
                     ref={hourRef}
-                    className="text-center text-2xl font-bold py-2 text-white w-14 h-14 flex items-center justify-center
-                             glow-text time-control"
+                    className="time-control text-center font-bold py-2 text-white w-14 h-14 flex items-center justify-center glow-text"
                     onTouchStart={handleTouchStart}
                     onTouchMove={(e) => handleTouchMove(e, 'hour')}
                     onTouchEnd={handleTouchEnd}
@@ -295,8 +301,8 @@ export default function TimeInput({ label, onTimeChange, placeholder = "12:00 AM
                   
                   <button 
                     onClick={() => handleHourChange(-1)}
-                    className="p-2 text-violet-300 hover:text-white focus:outline-none touch-target w-12 h-12 
-                             flex items-center justify-center transition-all hover:bg-violet-500/20 rounded-full time-transition"
+                    className="p-2 text-violet-300 hover:text-white focus:outline-none w-12 h-12 
+                             flex items-center justify-center transition-all hover:bg-violet-500/20 rounded-full"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -304,14 +310,14 @@ export default function TimeInput({ label, onTimeChange, placeholder = "12:00 AM
                   </button>
                 </div>
                 
-                <div className="text-2xl font-bold text-white time-control">:</div>
+                <div className="time-control font-bold text-white">:</div>
                 
                 {/* Minute selector */}
                 <div className="flex flex-col items-center">
                   <button 
                     onClick={() => handleMinuteChange(1)}
-                    className="p-2 text-violet-300 hover:text-white focus:outline-none touch-target w-12 h-12 
-                             flex items-center justify-center transition-all hover:bg-violet-500/20 rounded-full time-transition"
+                    className="p-2 text-violet-300 hover:text-white focus:outline-none w-12 h-12 
+                             flex items-center justify-center transition-all hover:bg-violet-500/20 rounded-full"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
@@ -320,8 +326,7 @@ export default function TimeInput({ label, onTimeChange, placeholder = "12:00 AM
                   
                   <div 
                     ref={minuteRef}
-                    className="text-center text-2xl font-bold py-2 text-white w-14 h-14 flex items-center justify-center
-                             glow-text time-control"
+                    className="time-control text-center font-bold py-2 text-white w-14 h-14 flex items-center justify-center glow-text"
                     onTouchStart={handleTouchStart}
                     onTouchMove={(e) => handleTouchMove(e, 'minute')}
                     onTouchEnd={handleTouchEnd}
@@ -331,8 +336,8 @@ export default function TimeInput({ label, onTimeChange, placeholder = "12:00 AM
                   
                   <button 
                     onClick={() => handleMinuteChange(-1)}
-                    className="p-2 text-violet-300 hover:text-white focus:outline-none touch-target w-12 h-12 
-                             flex items-center justify-center transition-all hover:bg-violet-500/20 rounded-full time-transition"
+                    className="p-2 text-violet-300 hover:text-white focus:outline-none w-12 h-12 
+                             flex items-center justify-center transition-all hover:bg-violet-500/20 rounded-full"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -343,10 +348,10 @@ export default function TimeInput({ label, onTimeChange, placeholder = "12:00 AM
                 {/* AM/PM toggle */}
                 <button
                   onClick={togglePeriod}
-                  className={`ml-3 px-5 py-3 rounded-xl text-lg font-bold focus:outline-none transition-all time-control time-transition
-                            ${selectedPeriod === 'AM' 
-                             ? 'bg-violet-600 text-white shadow-lg shadow-violet-600/30' 
-                             : 'bg-indigo-800 text-indigo-200'}`}
+                  className={`ml-3 px-5 py-3 rounded-xl font-bold focus:outline-none transition-all time-control
+                          ${selectedPeriod === 'AM' 
+                           ? 'bg-violet-600 text-white shadow-lg shadow-violet-600/30' 
+                           : 'bg-indigo-800 text-indigo-200'}`}
                 >
                   {selectedPeriod}
                 </button>
@@ -372,8 +377,8 @@ export default function TimeInput({ label, onTimeChange, placeholder = "12:00 AM
                         setShowTimePicker(false);
                       }}
                       className="py-2.5 px-3 text-center rounded-lg border border-violet-500/30 
-                               hover:border-violet-500/60 hover:bg-violet-600/20 text-indigo-200 
-                               transition-all flex items-center justify-center space-x-1.5 touch-target"
+                             hover:border-violet-500/60 hover:bg-violet-600/20 text-indigo-200 
+                             transition-all flex items-center justify-center gap-1.5"
                     >
                       <span className="text-sm font-medium">{option.label}</span>
                       <span className="text-xs">
@@ -384,18 +389,16 @@ export default function TimeInput({ label, onTimeChange, placeholder = "12:00 AM
                 </div>
               </div>
               
-              <div className="flex space-x-2 mt-4">
+              <div className="flex gap-2 mt-4">
                 <button
-                  className="flex-1 py-2.5 bg-violet-600 hover:bg-violet-700 text-white font-medium rounded-lg
-                         transition-colors focus:outline-none touch-target text-lg"
+                  className="flex-1 py-2.5 btn-primary rounded-lg"
                   onClick={() => setShowTimePicker(false)}
                 >
                   Done
                 </button>
                 
                 <button
-                  className="flex-1 py-2.5 bg-indigo-800 hover:bg-indigo-700 text-indigo-200 font-medium rounded-lg
-                         transition-colors focus:outline-none touch-target text-lg"
+                  className="flex-1 py-2.5 btn-secondary rounded-lg"
                   onClick={() => setShowTimePicker(false)}
                 >
                   Cancel
