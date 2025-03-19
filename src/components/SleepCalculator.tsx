@@ -9,14 +9,15 @@ import {
   calculateDeepWorkPeriods,
   calculateAfternoonSlump,
   calculateNapTime,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   getRecommendedSleepDuration,
   getBestWakeTime,
   getIdealNapDuration,
   Chronotype,
+  AgeRange,
   getChronotypeRecommendation,
   calculateSleepDuration,
-  getSleepCycles
+  getSleepCycles,
+  getPersonalizedSleepRecommendation
 } from '../utils/sleepCalculator';
 
 type CalculationType = 'wakeToBed' | 'bedToWake';
@@ -53,6 +54,16 @@ const Icons = {
     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 glow-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
     </svg>
+  ),
+  Age: () => (
+    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 glow-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+    </svg>
+  ),
+  Recommendation: () => (
+    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 glow-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+    </svg>
   )
 };
 
@@ -61,8 +72,10 @@ export default function SleepCalculator() {
   const [wakeUpTime, setWakeUpTime] = useState<Date | null>(null);
   const [bedTime, setBedTime] = useState<Date | null>(null);
   const [chronotype, setChronotype] = useState<ChronotypeOption>('unknown');
+  const [ageRange, setAgeRange] = useState<AgeRange>('adult');
   const [bestWakeUpTime, setBestWakeUpTime] = useState<string>('');
   const [napDuration, setNapDuration] = useState<string>('');
+  const [personalRecommendation, setPersonalRecommendation] = useState<string>('');
   
   // Result states
   const [bedtimes, setBedtimes] = useState<string[]>([]);
@@ -114,6 +127,18 @@ export default function SleepCalculator() {
         napDateTime.setHours(napHours);
         napDateTime.setMinutes(napMins);
         setNapDuration(getIdealNapDuration(napDateTime));
+        
+        // Generate personalized recommendation if chronotype is known
+        if (chronotype !== 'unknown') {
+          const recommendation = getPersonalizedSleepRecommendation(
+            chronotype as Chronotype, 
+            ageRange, 
+            newBedtimes
+          );
+          setPersonalRecommendation(recommendation);
+        } else {
+          setPersonalRecommendation('');
+        }
         
         // Clear other results
         setWakeUpTimes([]);
@@ -178,6 +203,18 @@ export default function SleepCalculator() {
         napDateTime.setMinutes(napMins);
         setNapDuration(getIdealNapDuration(napDateTime));
         
+        // Generate personalized recommendation if chronotype is known
+        if (chronotype !== 'unknown') {
+          const recommendation = getPersonalizedSleepRecommendation(
+            chronotype as Chronotype, 
+            ageRange, 
+            newWakeUpTimes
+          );
+          setPersonalRecommendation(recommendation);
+        } else {
+          setPersonalRecommendation('');
+        }
+        
         // Clear other results
         setBedtimes([]);
         setSleepDurations([]);
@@ -186,7 +223,7 @@ export default function SleepCalculator() {
         setLoading(false);
       }, 600);
     }
-  }, [calculationType, wakeUpTime, bedTime]);
+  }, [calculationType, wakeUpTime, bedTime, chronotype, ageRange]);
   
   // Handle calculation type change
   const handleTypeChange = (type: CalculationType) => {
@@ -205,6 +242,7 @@ export default function SleepCalculator() {
     setSleepCycles([]);
     setWakeUpSleepDurations([]);
     setWakeUpSleepCycles([]);
+    setPersonalRecommendation('');
   };
   
   // Update deep work periods when wake time is selected from bedToWake calculation
@@ -244,10 +282,10 @@ export default function SleepCalculator() {
   
   return (
     <div className="sleep-calculator-container">
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4 md:gap-6">
         {/* Calculator Type Selector */}
         <div className="calculation-type-selector">
-          <div className="inline-flex border-violet-500/20 w-full max-w-md overflow-x-auto glow-border">
+          <div className="card-cosmic p-1.5 rounded-xl shadow-sm inline-flex gap-3 border-violet-500/20 w-full max-w-md overflow-x-auto glow-border">
             <button
               onClick={() => handleTypeChange('wakeToBed')}
               className={`calculation-type-button ${
@@ -270,12 +308,13 @@ export default function SleepCalculator() {
         </div>
         
         {/* Personal profile */}
-        <div className="card-cosmic">
-          <h3 className="text-violet-300 mb-3 md:mb-4 glow-text font-medium">Personal Sleep Profile</h3>
+        <div className="card-cosmic p-4 md:p-5 rounded-xl shadow-sm border-violet-500/20">
+          <h3 className="text-lg font-medium text-violet-300 mb-3 md:mb-4 glow-text">Personal Sleep Profile</h3>
           
           <div className="flex flex-col space-y-4">
+            {/* Chronotype Selection */}
             <div>
-              <label className="block text-sm font-medium mb-2 text-indigo-200">
+              <label className="block text-sm font-medium mb-1.5 text-indigo-200">
                 Your Chronotype (Sleep-Wake Tendency)
               </label>
               <div className="chronotype-selector">
@@ -295,15 +334,40 @@ export default function SleepCalculator() {
               </div>
               {chronotypeRecommendation && (
                 <p className="mt-3 text-sm text-indigo-300">
-                  <span className="font-medium text-violet-300">Recommendation:</span> {chronotypeRecommendation}
+                  <span className="font-medium text-violet-300">Chronotype:</span> {chronotypeRecommendation}
                 </p>
               )}
+            </div>
+            
+            {/* Age Range Selection */}
+            <div>
+              <label className="block text-sm font-medium mb-1.5 text-indigo-200">
+                Your Age Range
+              </label>
+              <div className="chronotype-selector">
+                {(['teen', 'adult', 'older-adult'] as const).map((range) => (
+                  <button
+                    key={range}
+                    onClick={() => setAgeRange(range)}
+                    className={`chronotype-button ${
+                      ageRange === range ? 'active' : ''
+                    }`}
+                  >
+                    {range === 'teen' && "Teen (13-17)"}
+                    {range === 'adult' && "Adult (18-64)"}
+                    {range === 'older-adult' && "Older Adult (65+)"}
+                  </button>
+                ))}
+              </div>
+              <p className="mt-3 text-sm text-indigo-300">
+                <span className="font-medium text-violet-300">Sleep Needs:</span> {getRecommendedSleepDuration(ageRange)} of quality sleep is recommended for your age range.
+              </p>
             </div>
           </div>
         </div>
         
         {/* Time Input Section */}
-        <div className="card-cosmic">
+        <div className="card-cosmic p-4 md:p-5 rounded-xl shadow-sm border-violet-500/20">
           {calculationType === 'wakeToBed' ? (
             <TimeInput 
               label="What time do you want to wake up?" 
@@ -321,16 +385,31 @@ export default function SleepCalculator() {
         
         {/* Loading indicator */}
         {loading && (
-          <div className="loading-dots">
-            <div className="loading-dot"></div>
-            <div className="loading-dot"></div>
-            <div className="loading-dot"></div>
+          <div className="flex justify-center py-8">
+            <div className="loading-dots">
+              <div className="loading-dot"></div>
+              <div className="loading-dot"></div>
+              <div className="loading-dot"></div>
+            </div>
           </div>
         )}
         
         {/* Results Sections */}
         {!loading && (
           <div className="space-y-4 md:space-y-6 mt-1 md:mt-2">
+            {/* Personal Recommendation */}
+            {personalRecommendation && (
+              <div className="card-cosmic p-4 md:p-5 rounded-xl shadow-sm border-violet-500/20 bg-gradient-to-br from-indigo-950/80 to-violet-950/80">
+                <div className="flex items-start space-x-3">
+                  <Icons.Recommendation />
+                  <div>
+                    <h3 className="text-lg font-medium text-violet-300 mb-2">Your Personalized Recommendation</h3>
+                    <p className="text-indigo-200 text-sm">{personalRecommendation}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+            
             {/* Bedtime Results */}
             {bedtimes.length > 0 && (
               <SleepResults 

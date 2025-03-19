@@ -28,6 +28,9 @@ const CIRCADIAN = {
   MELATONIN_ONSET: 14, // Melatonin begins to rise ~14 hours after waking (for people with healthy circadian rhythms)
 };
 
+// Age ranges for sleep recommendations - merged young-adult and adult
+export type AgeRange = 'teen' | 'adult' | 'older-adult';
+
 // Convert a Date object to minutes since midnight
 export function dateToMinutes(date: Date): number {
   return date.getHours() * MINUTES_IN_HOUR + date.getMinutes();
@@ -79,13 +82,14 @@ export function calculateBedtimes(wakeUpTime: Date): string[] {
   const wakeupMinutes = dateToMinutes(wakeUpTime);
   const bedtimes: string[] = [];
   
-  // Calculate sleep cycles backward from wake time
+  // Calculate sleep cycles backward from wake time, starting from MAX (most) to MIN (least)
   for (let cycles = MAX_SLEEP_CYCLES; cycles >= MIN_SLEEP_CYCLES; cycles--) {
     const totalSleepMinutes = cycles * SLEEP_CYCLE_MINUTES;
     const bedtimeMinutes = wakeupMinutes - totalSleepMinutes - FALL_ASLEEP_TIME_MINUTES;
     bedtimes.push(minutesToTimeString(bedtimeMinutes));
   }
   
+  // Now the bedtimes are ordered from most cycles (MAX_SLEEP_CYCLES) to least cycles (MIN_SLEEP_CYCLES)
   return bedtimes;
 }
 
@@ -97,13 +101,14 @@ export function calculateWakeUpTimes(bedTime: Date): string[] {
   // Add the average time to fall asleep
   const actualSleepStartMinutes = bedtimeMinutes + FALL_ASLEEP_TIME_MINUTES;
   
-  // Calculate sleep cycles forward from bed time
-  for (let cycles = MIN_SLEEP_CYCLES; cycles <= MAX_SLEEP_CYCLES; cycles++) {
+  // Calculate sleep cycles forward from bed time, starting from MAX (most) to MIN (least)
+  for (let cycles = MAX_SLEEP_CYCLES; cycles >= MIN_SLEEP_CYCLES; cycles--) {
     const totalSleepMinutes = cycles * SLEEP_CYCLE_MINUTES;
     const wakeUpMinutes = actualSleepStartMinutes + totalSleepMinutes;
     wakeUpTimes.push(minutesToTimeString(wakeUpMinutes));
   }
   
+  // Now the wakeUpTimes are ordered from most cycles (MAX_SLEEP_CYCLES) to least cycles (MIN_SLEEP_CYCLES)
   return wakeUpTimes;
 }
 
@@ -332,12 +337,18 @@ export function getIdealNapDuration(napTime: Date): string {
   }
 }
 
-// Get recommended sleep duration range in hours
-export function getRecommendedSleepDuration(): string {
-  const minHours = MIN_SLEEP_CYCLES * (SLEEP_CYCLE_MINUTES / 60);
-  const maxHours = MAX_SLEEP_CYCLES * (SLEEP_CYCLE_MINUTES / 60);
-  
-  return `${minHours} - ${maxHours} hours`;
+// Get recommended sleep duration range in hours based on age
+export function getRecommendedSleepDuration(ageRange: AgeRange): string {
+  switch(ageRange) {
+    case 'teen':
+      return "8-10 hours";
+    case 'adult':
+      return "7-9 hours";
+    case 'older-adult':
+      return "7-8 hours";
+    default:
+      return "7-9 hours";
+  }
 }
 
 // Get recommended bedtime based on chronotype (approximate)
@@ -356,30 +367,67 @@ export function getChronotypeRecommendation(chronotype: Chronotype): string {
   }
 }
 
-// Calculate wake window (optimal time to be awake) based on age
-export function getRecommendedWakeWindow(age: number): string {
-  if (age < 1) {
-    return "2-3 hours";
-  } else if (age < 2) {
-    return "3-5 hours";
-  } else if (age < 5) {
-    return "5-6 hours";
-  } else if (age < 13) {
-    return "6-8 hours";
-  } else if (age < 18) {
-    return "8-10 hours";
+// Get personalized sleep recommendation based on chronotype and age
+export function getPersonalizedSleepRecommendation(chronotype: Chronotype, ageRange: AgeRange, calculatedTimes: string[]): string {
+  // If no calculated times available, provide general guidance
+  if (!calculatedTimes || calculatedTimes.length === 0) {
+    return getChronotypeRecommendation(chronotype);
+  }
+  
+  // Get optimal sleep duration for age
+  const sleepDuration = getRecommendedSleepDuration(ageRange);
+  
+  // Choose recommended time from calculated options based on chronotype and age
+  let recommendedIndex = 0;
+  
+  if (ageRange === 'teen') {
+    // Teens need more sleep - recommend earlier bedtime (more cycles)
+    recommendedIndex = 0; // First option with most sleep cycles
+  } else if (ageRange === 'older-adult') {
+    // Older adults often do better with a bit less sleep
+    recommendedIndex = Math.min(2, calculatedTimes.length - 1); // Third option or last if fewer available
   } else {
-    return "15-17 hours";
+    // Adults - middle options are usually best
+    // For early chronotype, favor earlier times (more sleep)
+    // For late chronotype, favor later times (less sleep)
+    if (chronotype === 'early') {
+      recommendedIndex = 0; // First option - more sleep for early types
+    } else if (chronotype === 'late') {
+      recommendedIndex = Math.min(2, calculatedTimes.length - 1); // Third option - less sleep for night owls
+    } else {
+      recommendedIndex = 1; // Second option for intermediate types
+    }
+  }
+  
+  const recommendedTime = calculatedTimes[recommendedIndex] || calculatedTimes[0];
+  
+  return `Based on your ${chronotype} chronotype and age range, we recommend ${recommendedTime}. Adults in your age range typically need ${sleepDuration} of quality sleep.`;
+}
+
+// Calculate wake window (optimal time to be awake) based on age
+export function getRecommendedWakeWindow(ageRange: AgeRange): string {
+  switch(ageRange) {
+    case 'teen':
+      return "8-10 hours";
+    case 'adult':
+      return "15-17 hours";
+    case 'older-adult':
+      return "15-16 hours";
+    default:
+      return "16 hours";
   }
 }
 
 // Get deep sleep percentage estimate based on age
-export function getDeepSleepPercentage(age: number): number {
-  if (age < 18) {
-    return 25; // Children and teens have more deep sleep
-  } else if (age < 65) {
-    return 20; // Adults have moderate deep sleep
-  } else {
-    return 15; // Elderly have less deep sleep
+export function getDeepSleepPercentage(ageRange: AgeRange): number {
+  switch(ageRange) {
+    case 'teen':
+      return 25; // Teens have more deep sleep
+    case 'adult':
+      return 20; // Adults have moderate deep sleep
+    case 'older-adult':
+      return 15; // Older adults have less deep sleep
+    default:
+      return 20;
   }
-} 
+}
