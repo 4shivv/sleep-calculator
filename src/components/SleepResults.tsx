@@ -18,7 +18,8 @@ export default function SleepResults({
   items, 
   description, 
   icon, 
-  accent: _,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  accent, 
   onSelect,
   sleepDurations = [],
   cycles = []
