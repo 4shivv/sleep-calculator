@@ -211,7 +211,8 @@ export default function TimeInput({ label, onTimeChange, placeholder = "12:00 AM
         {label}
       </label>
       
-      <div className="relative">
+      {/* Container that will expand to fit the time picker */}
+      <div className={`relative ${showTimePicker ? 'pb-[450px] sm:pb-[400px]' : ''} transition-all duration-300`}>
         <div className="flex flex-col sm:flex-row gap-2 time-input-mobile">
           <div className="relative flex-grow">
             <input
@@ -258,138 +259,152 @@ export default function TimeInput({ label, onTimeChange, placeholder = "12:00 AM
         
         {error && <p className="mt-1.5 text-sm text-red-400">{error}</p>}
         
-        {/* Time picker dropdown */}
+        {/* Time picker dropdown - Styled to stay within the parent, but visible */}
         {showTimePicker && (
           <div 
             ref={timePickerRef}
-            className="absolute z-50 mt-2 bg-indigo-950/90 backdrop-blur-xl border-2 border-violet-500/40 rounded-xl shadow-lg p-4 
-                     sm:p-5 w-full max-w-sm animate-fadeIn overflow-hidden time-picker-cosmic"
+            className="absolute left-0 right-0 mt-2 z-50"
           >
-            <div className="flex justify-center items-center space-x-4 relative py-3">
-              {/* Hour selector */}
-              <div className="flex flex-col items-center">
-                <button 
-                  onClick={() => handleHourChange(1)}
-                  className="p-2 text-violet-300 hover:text-white focus:outline-none touch-target w-12 h-12 
-                           flex items-center justify-center transition-all hover:bg-violet-500/20 rounded-full time-transition"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-                  </svg>
-                </button>
-                
-                <div 
-                  ref={hourRef}
-                  className="text-center text-2xl font-bold py-2 text-white w-14 h-14 flex items-center justify-center
-                           glow-text time-control"
-                  onTouchStart={handleTouchStart}
-                  onTouchMove={(e) => handleTouchMove(e, 'hour')}
-                  onTouchEnd={handleTouchEnd}
-                >
-                  {selectedHour}
-                </div>
-                
-                <button 
-                  onClick={() => handleHourChange(-1)}
-                  className="p-2 text-violet-300 hover:text-white focus:outline-none touch-target w-12 h-12 
-                           flex items-center justify-center transition-all hover:bg-violet-500/20 rounded-full time-transition"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
-              </div>
-              
-              <div className="text-2xl font-bold text-white time-control">:</div>
-              
-              {/* Minute selector */}
-              <div className="flex flex-col items-center">
-                <button 
-                  onClick={() => handleMinuteChange(1)}
-                  className="p-2 text-violet-300 hover:text-white focus:outline-none touch-target w-12 h-12 
-                           flex items-center justify-center transition-all hover:bg-violet-500/20 rounded-full time-transition"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-                  </svg>
-                </button>
-                
-                <div 
-                  ref={minuteRef}
-                  className="text-center text-2xl font-bold py-2 text-white w-14 h-14 flex items-center justify-center
-                           glow-text time-control"
-                  onTouchStart={handleTouchStart}
-                  onTouchMove={(e) => handleTouchMove(e, 'minute')}
-                  onTouchEnd={handleTouchEnd}
-                >
-                  {selectedMinute.toString().padStart(2, '0')}
-                </div>
-                
-                <button 
-                  onClick={() => handleMinuteChange(-1)}
-                  className="p-2 text-violet-300 hover:text-white focus:outline-none touch-target w-12 h-12 
-                           flex items-center justify-center transition-all hover:bg-violet-500/20 rounded-full time-transition"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
-              </div>
-              
-              {/* AM/PM toggle */}
-              <button
-                onClick={togglePeriod}
-                className={`ml-3 px-5 py-3 rounded-xl text-lg font-bold focus:outline-none transition-all time-control time-transition
-                          ${selectedPeriod === 'AM' 
-                           ? 'bg-violet-600 text-white shadow-lg shadow-violet-600/30' 
-                           : 'bg-indigo-800 text-indigo-200'}`}
-              >
-                {selectedPeriod}
-              </button>
-            </div>
-            
-            {/* Quick time selections */}
-            <div className="mt-4 pt-3 border-t border-indigo-700/50">
-              <p className="text-sm font-medium text-indigo-300 mb-2">Quick Select</p>
-              <div className="grid grid-cols-2 gap-2">
-                {[
-                  { label: 'Morning', time: { hour: 7, minute: 0, period: 'AM' as const } },
-                  { label: 'Noon', time: { hour: 12, minute: 0, period: 'PM' as const } },
-                  { label: 'Evening', time: { hour: 6, minute: 0, period: 'PM' as const } },
-                  { label: 'Night', time: { hour: 10, minute: 0, period: 'PM' as const } }
-                ].map(option => (
-                  <button
-                    key={option.label}
-                    type="button"
-                    onClick={() => {
-                      setSelectedHour(option.time.hour);
-                      setSelectedMinute(option.time.minute);
-                      setSelectedPeriod(option.time.period);
-                      setShowTimePicker(false);
-                    }}
-                    className="py-2.5 px-3 text-center rounded-lg border border-violet-500/30 
-                             hover:border-violet-500/60 hover:bg-violet-600/20 text-indigo-200 
-                             transition-all flex items-center justify-center space-x-1.5 touch-target"
-                  >
-                    <span className="text-sm font-medium">{option.label}</span>
-                    <span className="text-xs">
-                      ({option.time.hour}:{option.time.minute.toString().padStart(2, '0')} {option.time.period})
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </div>
-            
-            <button
-              className="w-full mt-4 py-2.5 bg-violet-600 hover:bg-violet-700 text-white font-medium rounded-lg
-                       transition-colors focus:outline-none touch-target text-lg"
-              onClick={() => setShowTimePicker(false)}
+            <div 
+              className="bg-indigo-950/95 backdrop-blur-xl border-2 border-violet-500/40 rounded-xl shadow-lg p-4 
+                       sm:p-5 w-full animate-fadeIn overflow-hidden time-picker-cosmic"
             >
-              Done
-            </button>
+              <div className="flex justify-center items-center space-x-4 relative py-3">
+                {/* Hour selector */}
+                <div className="flex flex-col items-center">
+                  <button 
+                    onClick={() => handleHourChange(1)}
+                    className="p-2 text-violet-300 hover:text-white focus:outline-none touch-target w-12 h-12 
+                             flex items-center justify-center transition-all hover:bg-violet-500/20 rounded-full time-transition"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                    </svg>
+                  </button>
+                  
+                  <div 
+                    ref={hourRef}
+                    className="text-center text-2xl font-bold py-2 text-white w-14 h-14 flex items-center justify-center
+                             glow-text time-control"
+                    onTouchStart={handleTouchStart}
+                    onTouchMove={(e) => handleTouchMove(e, 'hour')}
+                    onTouchEnd={handleTouchEnd}
+                  >
+                    {selectedHour}
+                  </div>
+                  
+                  <button 
+                    onClick={() => handleHourChange(-1)}
+                    className="p-2 text-violet-300 hover:text-white focus:outline-none touch-target w-12 h-12 
+                             flex items-center justify-center transition-all hover:bg-violet-500/20 rounded-full time-transition"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                </div>
+                
+                <div className="text-2xl font-bold text-white time-control">:</div>
+                
+                {/* Minute selector */}
+                <div className="flex flex-col items-center">
+                  <button 
+                    onClick={() => handleMinuteChange(1)}
+                    className="p-2 text-violet-300 hover:text-white focus:outline-none touch-target w-12 h-12 
+                             flex items-center justify-center transition-all hover:bg-violet-500/20 rounded-full time-transition"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                    </svg>
+                  </button>
+                  
+                  <div 
+                    ref={minuteRef}
+                    className="text-center text-2xl font-bold py-2 text-white w-14 h-14 flex items-center justify-center
+                             glow-text time-control"
+                    onTouchStart={handleTouchStart}
+                    onTouchMove={(e) => handleTouchMove(e, 'minute')}
+                    onTouchEnd={handleTouchEnd}
+                  >
+                    {selectedMinute.toString().padStart(2, '0')}
+                  </div>
+                  
+                  <button 
+                    onClick={() => handleMinuteChange(-1)}
+                    className="p-2 text-violet-300 hover:text-white focus:outline-none touch-target w-12 h-12 
+                             flex items-center justify-center transition-all hover:bg-violet-500/20 rounded-full time-transition"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                </div>
+                
+                {/* AM/PM toggle */}
+                <button
+                  onClick={togglePeriod}
+                  className={`ml-3 px-5 py-3 rounded-xl text-lg font-bold focus:outline-none transition-all time-control time-transition
+                            ${selectedPeriod === 'AM' 
+                             ? 'bg-violet-600 text-white shadow-lg shadow-violet-600/30' 
+                             : 'bg-indigo-800 text-indigo-200'}`}
+                >
+                  {selectedPeriod}
+                </button>
+              </div>
+              
+              {/* Quick time selections */}
+              <div className="mt-4 pt-3 border-t border-indigo-700/50">
+                <p className="text-sm font-medium text-indigo-300 mb-2">Quick Select</p>
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    { label: 'Morning', time: { hour: 7, minute: 0, period: 'AM' as const } },
+                    { label: 'Noon', time: { hour: 12, minute: 0, period: 'PM' as const } },
+                    { label: 'Evening', time: { hour: 6, minute: 0, period: 'PM' as const } },
+                    { label: 'Night', time: { hour: 10, minute: 0, period: 'PM' as const } }
+                  ].map(option => (
+                    <button
+                      key={option.label}
+                      type="button"
+                      onClick={() => {
+                        setSelectedHour(option.time.hour);
+                        setSelectedMinute(option.time.minute);
+                        setSelectedPeriod(option.time.period);
+                        setShowTimePicker(false);
+                      }}
+                      className="py-2.5 px-3 text-center rounded-lg border border-violet-500/30 
+                               hover:border-violet-500/60 hover:bg-violet-600/20 text-indigo-200 
+                               transition-all flex items-center justify-center space-x-1.5 touch-target"
+                    >
+                      <span className="text-sm font-medium">{option.label}</span>
+                      <span className="text-xs">
+                        ({option.time.hour}:{option.time.minute.toString().padStart(2, '0')} {option.time.period})
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+              
+              <div className="flex space-x-2 mt-4">
+                <button
+                  className="flex-1 py-2.5 bg-violet-600 hover:bg-violet-700 text-white font-medium rounded-lg
+                         transition-colors focus:outline-none touch-target text-lg"
+                  onClick={() => setShowTimePicker(false)}
+                >
+                  Done
+                </button>
+                
+                <button
+                  className="flex-1 py-2.5 bg-indigo-800 hover:bg-indigo-700 text-indigo-200 font-medium rounded-lg
+                         transition-colors focus:outline-none touch-target text-lg"
+                  onClick={() => setShowTimePicker(false)}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>
     </div>
   );
-} 
+}
