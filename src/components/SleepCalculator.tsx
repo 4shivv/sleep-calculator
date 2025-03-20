@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import TimeInput from './TimeInput';
 import SleepResults from './SleepResults';
 import { 
@@ -127,7 +127,7 @@ export default function SleepCalculator() {
     const hourMatch = sleepDurationStr.match(/(\d+)\s*hours?/);
     const minuteMatch = sleepDurationStr.match(/(\d+)\s*mins?/);
     
-    let hours = hourMatch ? parseInt(hourMatch[1]) : 0;
+    const hours = hourMatch ? parseInt(hourMatch[1]) : 0;
     const minutes = minuteMatch ? parseInt(minuteMatch[1]) : 0;
     
     // Convert to decimal hours
@@ -201,18 +201,18 @@ export default function SleepCalculator() {
   };
   
   // Helper to calculate multiple nap times and energy dips
-  const calculateMultipleTimeOptions = (wakeUpTime: Date, deficitLevel: SleepDeficitLevel) => {
+  const calculateMultipleTimeOptions = useCallback((wakeTime: Date, deficitLevel: SleepDeficitLevel) => {
     // Energy dips calculation based on circadian rhythm research
     const energyDips = [];
     
     // Primary afternoon dip (occurs 6-8 hours after waking)
-    const postLunchDipStart = new Date(wakeUpTime);
+    const postLunchDipStart = new Date(wakeTime);
     postLunchDipStart.setHours(postLunchDipStart.getHours() + 6);
     const postLunchDipEnd = new Date(postLunchDipStart);
     postLunchDipEnd.setHours(postLunchDipEnd.getHours() + 2);
     
     // Evening dip (occurs 12-14 hours after waking)
-    const eveningDipStart = new Date(wakeUpTime);
+    const eveningDipStart = new Date(wakeTime);
     eveningDipStart.setHours(eveningDipStart.getHours() + 12);
     const eveningDipEnd = new Date(eveningDipStart);
     eveningDipEnd.setHours(eveningDipEnd.getHours() + 2);
@@ -224,7 +224,7 @@ export default function SleepCalculator() {
     // Mid-morning dip (only for sleep deprived individuals)
     let morningDipStr = '';
     if (deficitLevel === 'moderate' || deficitLevel === 'severe') {
-      const morningDipStart = new Date(wakeUpTime);
+      const morningDipStart = new Date(wakeTime);
       morningDipStart.setHours(morningDipStart.getHours() + 3);
       const morningDipEnd = new Date(morningDipStart);
       morningDipEnd.setMinutes(morningDipEnd.getMinutes() + 60);
@@ -241,7 +241,7 @@ export default function SleepCalculator() {
     
     // Late morning nap (4-5 hours after waking) for sleep deficient
     if (deficitLevel === 'mild' || deficitLevel === 'moderate' || deficitLevel === 'severe') {
-      const morningNapTime = new Date(wakeUpTime);
+      const morningNapTime = new Date(wakeTime);
       morningNapTime.setHours(morningNapTime.getHours() + 4.5);
       napTimeObjects.push({
         time: morningNapTime,
@@ -251,7 +251,7 @@ export default function SleepCalculator() {
     
     // Primary nap time (early afternoon, 6-7 hours after waking)
     // This is the ideal nap time that aligns with natural circadian dip
-    const primaryNapTime = new Date(wakeUpTime);
+    const primaryNapTime = new Date(wakeTime);
     primaryNapTime.setHours(primaryNapTime.getHours() + 6.5);
     napTimeObjects.push({
       time: primaryNapTime,
@@ -260,7 +260,7 @@ export default function SleepCalculator() {
     
     // Late afternoon nap (8-9 hours after waking)
     if (deficitLevel === 'moderate' || deficitLevel === 'severe') {
-      const lateAfternoonNapTime = new Date(wakeUpTime);
+      const lateAfternoonNapTime = new Date(wakeTime);
       lateAfternoonNapTime.setHours(lateAfternoonNapTime.getHours() + 8.5);
       napTimeObjects.push({
         time: lateAfternoonNapTime,
@@ -270,7 +270,7 @@ export default function SleepCalculator() {
     
     // Early evening nap (for severely sleep deprived)
     if (deficitLevel === 'severe') {
-      const eveningNapTime = new Date(wakeUpTime);
+      const eveningNapTime = new Date(wakeTime);
       eveningNapTime.setHours(eveningNapTime.getHours() + 11);
       napTimeObjects.push({
         time: eveningNapTime,
@@ -290,7 +290,7 @@ export default function SleepCalculator() {
       napTimes,
       napDurations
     };
-  };
+  }, []);
   
   // Helper to format a Date object to a time string (e.g., "2:30 PM")
   const formatTime = (date: Date): string => {
