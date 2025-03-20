@@ -8,17 +8,13 @@ A scientific web application that helps users optimize their sleep schedule and 
 
 The Sleep Cycle Calculator is designed to provide users with personalized sleep and productivity recommendations based on scientific research. It aims to enhance users' daily performance by aligning their activities with their natural biological rhythms.
 
-## Features
+## Technologies Used
 
-- **Modern Responsive Design**: Fluid mobile interface with elegant animations and dark mode support
-- **Calculate Optimal Bedtimes**: Enter your wake-up time and get scientifically recommended bedtimes based on 90-minute sleep cycles
-- **Calculate Optimal Wake-up Times**: Enter your bedtime and get recommended wake-up times aligned with both sleep cycles and natural daylight
-- **Chronotype Analysis**: Personalized sleep recommendations based on whether you're an early bird, intermediate, or night owl
-- **Comprehensive Productivity Recommendations**:
-  - Optimal deep work periods based on peak alertness times in your circadian rhythm
-  - Afternoon energy slump prediction with guidance on when to schedule breaks
-  - Ideal nap time recommendation with duration guidance based on time of day
-  - Scientific explanations for all recommendations
+- Next.js 14 with App Router
+- TypeScript
+- Tailwind CSS
+- React Hooks
+- Modern responsive design with fluid animations
 
 ## Sleep Science
 
@@ -32,13 +28,17 @@ This calculator is built on evidence-based sleep research:
 - Post-lunch energy dip typically occurs 6-8 hours after waking
 - Sleep chronotype (whether you're a morning lark or night owl) influences optimal sleep times
 
-## Technologies Used
+## Features
 
-- Next.js 14 with App Router
-- TypeScript
-- Tailwind CSS
-- React Hooks
-- Modern responsive design with fluid animations
+- **Modern Responsive Design**: Fluid mobile interface with elegant animations and dark mode support
+- **Calculate Optimal Bedtimes**: Enter your wake-up time and get scientifically recommended bedtimes based on 90-minute sleep cycles
+- **Calculate Optimal Wake-up Times**: Enter your bedtime and get recommended wake-up times aligned with both sleep cycles and natural daylight
+- **Chronotype Analysis**: Personalized sleep recommendations based on whether you're an early bird, intermediate, or night owl
+- **Comprehensive Productivity Recommendations**:
+  - Optimal deep work periods based on peak alertness times in your circadian rhythm
+  - Afternoon energy slump prediction with guidance on when to schedule breaks
+  - Ideal nap time recommendation with duration guidance based on time of day
+  - Scientific explanations for all recommendations
 
 ## Getting Started
 
@@ -82,22 +82,3 @@ The app can be easily deployed to platforms like Vercel or Netlify:
 npm run build
 ```
 
-## Scientific References
-
-This calculator incorporates research from multiple sleep science studies:
-
-- Circadian timing principles in sleep-wake regulation
-- REM/NREM sleep stage duration and proportions
-- The effects of chronotype on optimal sleep scheduling
-- The relationship between sleep cycles and daytime alertness
-- Cognitive performance patterns throughout the day
-
-## License
-
-MIT
-
-## Acknowledgments
-
-- Sleep science researchers
-- Next.js team for the framework
-- Tailwind CSS for the styling system
