@@ -834,6 +834,7 @@ export default function SleepCalculator() {
                 cycles={sleepCycles}
                 onSelect={handleBedTimeSelect}
                 selectedIndex={selectedBedTimeIndex}
+                bestWakeUpTime={bestWakeUpTime}
               />
             )}
             
@@ -848,6 +849,7 @@ export default function SleepCalculator() {
                 sleepDurations={wakeUpSleepDurations}
                 cycles={wakeUpSleepCycles}
                 selectedIndex={selectedWakeTimeIndex}
+                bestWakeUpTime={bestWakeUpTime}
               />
             )}
             

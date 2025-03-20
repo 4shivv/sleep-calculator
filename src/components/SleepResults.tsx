@@ -13,6 +13,7 @@ interface SleepResultsProps {
   cycles?: number[];
   selectedIndex?: number | null;
   extraInfo?: string[];
+  bestWakeUpTime?: string;
 }
 
 export default function SleepResults({ 
@@ -26,7 +27,8 @@ export default function SleepResults({
   sleepDurations = [],
   cycles = [],
   selectedIndex = null,
-  extraInfo = []
+  extraInfo = [],
+  bestWakeUpTime,
 }: SleepResultsProps) {
   const [expanded, setExpanded] = useState(true);
   
