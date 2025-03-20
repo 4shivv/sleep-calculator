@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import TimeInput from './TimeInput';
 import SleepResults from './SleepResults';
 import { 
@@ -77,6 +77,11 @@ export default function SleepCalculator() {
   const [napDuration, setNapDuration] = useState<string>('');
   const [personalRecommendation, setPersonalRecommendation] = useState<string>('');
   
+  // Selection states
+  const [selectedWakeTimeIndex, setSelectedWakeTimeIndex] = useState<number | null>(null);
+  const [selectedBedTimeIndex, setSelectedBedTimeIndex] = useState<number | null>(null);
+  const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  
   // Result states
   const [bedtimes, setBedtimes] = useState<string[]>([]);
   const [wakeUpTimes, setWakeUpTimes] = useState<string[]>([]);
@@ -89,10 +94,42 @@ export default function SleepCalculator() {
   const [wakeUpSleepDurations, setWakeUpSleepDurations] = useState<string[]>([]);
   const [wakeUpSleepCycles, setWakeUpSleepCycles] = useState<number[]>([]);
   
+  // Flag to disable main useEffect temporarily
+  const skipMainEffect = useRef(false);
+  
+  // Helper function to convert a time string to a Date object
+  const timeStringToDate = (timeStr: string): Date => {
+    const [hoursStr, minutesStr] = timeStr.split(':');
+    const [minutes, period] = minutesStr.split(' ');
+    
+    let hours = parseInt(hoursStr);
+    if (period === 'PM' && hours < 12) hours += 12;
+    if (period === 'AM' && hours === 12) hours = 0;
+    
+    const date = new Date();
+    date.setHours(hours);
+    date.setMinutes(parseInt(minutes));
+    date.setSeconds(0);
+    date.setMilliseconds(0);
+    
+    return date;
+  };
+  
   // Calculate results when inputs change
   useEffect(() => {
+    // Skip if we're handling a selected time
+    if (skipMainEffect.current) {
+      skipMainEffect.current = false;
+      return;
+    }
+    
     if (calculationType === 'wakeToBed' && wakeUpTime) {
       setLoading(true);
+      
+      // Reset selection states
+      setSelectedBedTimeIndex(null);
+      setSelectedWakeTimeIndex(null);
+      setSelectedTime(null);
       
       // Simulate a loading delay for better UX
       setTimeout(() => {
@@ -115,9 +152,13 @@ export default function SleepCalculator() {
         setSleepCycles(cycles);
         
         // Calculate productivity periods based on wake-up time
-        setDeepWorkPeriods(calculateDeepWorkPeriods(wakeUpTime));
-        setAfternoonSlump(calculateAfternoonSlump(wakeUpTime));
-        setNapTime(calculateNapTime(wakeUpTime));
+        const newDeepWorkPeriods = calculateDeepWorkPeriods(wakeUpTime);
+        const newAfternoonSlump = calculateAfternoonSlump(wakeUpTime);
+        const newNapTime = calculateNapTime(wakeUpTime);
+        
+        setDeepWorkPeriods(newDeepWorkPeriods);
+        setAfternoonSlump(newAfternoonSlump);
+        setNapTime(newNapTime);
         
         // Calculate nap duration
         const napTimeDate = new Date(wakeUpTime);
@@ -151,6 +192,11 @@ export default function SleepCalculator() {
     } else if (calculationType === 'bedToWake' && bedTime) {
       setLoading(true);
       
+      // Reset selection states
+      setSelectedBedTimeIndex(null);
+      setSelectedWakeTimeIndex(null);
+      setSelectedTime(null);
+      
       // Simulate a loading delay for better UX
       setTimeout(() => {
         const newWakeUpTimes = calculateWakeUpTimes(bedTime);
@@ -176,23 +222,16 @@ export default function SleepCalculator() {
         setBestWakeUpTime(best);
         
         // Calculate productivity periods based on the best wake-up time
-        // First, convert best wake time string to Date
-        const bestWakeTimeParts = best.split(':');
-        const [bestWakeTimeHours, bestWakeTimeMinutesWithPeriod] = bestWakeTimeParts;
-        const [bestWakeTimeMinutes, period] = bestWakeTimeMinutesWithPeriod.split(' ');
+        const bestWakeTimeDate = timeStringToDate(best);
         
-        let hours = parseInt(bestWakeTimeHours);
-        if (period === 'PM' && hours < 12) hours += 12;
-        if (period === 'AM' && hours === 12) hours = 0;
+        // Calculate productivity periods based on best wake time
+        const newDeepWorkPeriods = calculateDeepWorkPeriods(bestWakeTimeDate);
+        const newAfternoonSlump = calculateAfternoonSlump(bestWakeTimeDate);
+        const newNapTime = calculateNapTime(bestWakeTimeDate);
         
-        const bestWakeTimeDate = new Date();
-        bestWakeTimeDate.setHours(hours);
-        bestWakeTimeDate.setMinutes(parseInt(bestWakeTimeMinutes));
-        
-        // Calculate productivity periods
-        setDeepWorkPeriods(calculateDeepWorkPeriods(bestWakeTimeDate));
-        setAfternoonSlump(calculateAfternoonSlump(bestWakeTimeDate));
-        setNapTime(calculateNapTime(bestWakeTimeDate));
+        setDeepWorkPeriods(newDeepWorkPeriods);
+        setAfternoonSlump(newAfternoonSlump);
+        setNapTime(newNapTime);
         
         // Calculate nap duration
         const napTimeDate = new Date(bestWakeTimeDate);
@@ -243,199 +282,92 @@ export default function SleepCalculator() {
     setWakeUpSleepDurations([]);
     setWakeUpSleepCycles([]);
     setPersonalRecommendation('');
+    setSelectedBedTimeIndex(null);
+    setSelectedWakeTimeIndex(null);
+    setSelectedTime(null);
   };
   
-  // Update the state and productivity data when a wake time is selected
-  const handleWakeTimeSelect = (time: string) => {
-    // Parse the selected wake time
-    const [hoursStr, minutesStr] = time.split(':');
-    const [minutes, period] = minutesStr.split(' ');
+  // Handle when a wake time is selected (from bedToWake mode)
+  const handleWakeTimeSelect = (time: string, index: number) => {
+    // Set a flag to skip the main useEffect
+    skipMainEffect.current = true;
+    setSelectedWakeTimeIndex(index);
+    setSelectedBedTimeIndex(null);
+    setSelectedTime(time);
     
-    let hours = parseInt(hoursStr);
-    if (period === 'PM' && hours < 12) hours += 12;
-    if (period === 'AM' && hours === 12) hours = 0;
+    // Convert the selected time string to a Date object
+    const selectedWakeTime = timeStringToDate(time);
     
-    const selectedWakeTime = new Date();
-    selectedWakeTime.setHours(hours);
-    selectedWakeTime.setMinutes(parseInt(minutes));
+    // Calculate new productivity periods based on this wake-up time
+    const newDeepWorkPeriods = calculateDeepWorkPeriods(selectedWakeTime);
+    const newAfternoonSlump = calculateAfternoonSlump(selectedWakeTime);
+    const newNapTime = calculateNapTime(selectedWakeTime);
     
-    // Update wake time and calculate productivity periods
-    setWakeUpTime(selectedWakeTime);
-    setDeepWorkPeriods(calculateDeepWorkPeriods(selectedWakeTime));
-    setAfternoonSlump(calculateAfternoonSlump(selectedWakeTime));
-    setNapTime(calculateNapTime(selectedWakeTime));
+    // Force a direct state update
+    setDeepWorkPeriods([...newDeepWorkPeriods]);
+    setAfternoonSlump(newAfternoonSlump);
+    setNapTime(newNapTime);
     
     // Calculate nap duration
     const napTimeDate = new Date(selectedWakeTime);
-    const napHours = new Date(napTimeDate.getTime() + 6.5 * 60 * 60 * 1000).getHours();
-    const napMins = new Date(napTimeDate.getTime() + 6.5 * 60 * 60 * 1000).getMinutes();
     const napDateTime = new Date();
-    napDateTime.setHours(napHours);
-    napDateTime.setMinutes(napMins);
+    napDateTime.setHours(napTimeDate.getHours() + 6);
+    napDateTime.setMinutes(napTimeDate.getMinutes() + 30);
     setNapDuration(getIdealNapDuration(napDateTime));
     
-    // If in bedToWake mode and have a bedTime, update all calculations
-    if (calculationType === 'bedToWake' && bedTime) {
-      // Calculate sleep duration for this specific wake-up time
-      const duration = calculateSleepDuration(bedTime, selectedWakeTime);
-      const cycleCount = getSleepCycles(bedTime, selectedWakeTime);
-      
-      // Update the sleep duration and cycles (in arrays with single item)
-      setWakeUpSleepDurations([duration]);
-      setWakeUpSleepCycles([cycleCount]);
-      
-      // Update recommendation based on selected wake time if chronotype is known
-      if (chronotype !== 'unknown') {
-        const recommendation = getPersonalizedSleepRecommendation(
-          chronotype as Chronotype,
-          ageRange,
-          [time]
-        );
-        setPersonalRecommendation(recommendation);
-      }
-    } 
-    // If in wakeToBed mode, calculate new bedtimes and update all calculations
-    else if (calculationType === 'wakeToBed') {
-      // Calculate new bedtimes
-      const newBedtimes = calculateBedtimes(selectedWakeTime);
-      setBedtimes(newBedtimes);
-      
-      // Calculate sleep durations and cycles for each bedtime
-      const durations: string[] = [];
-      const cycles: number[] = [];
-      
-      newBedtimes.forEach((bedtimeStr) => {
-        const duration = calculateSleepDuration(bedtimeStr, selectedWakeTime);
-        durations.push(duration);
-        
-        const cycleCount = getSleepCycles(bedtimeStr, selectedWakeTime);
-        cycles.push(cycleCount);
-      });
-      
-      setSleepDurations(durations);
-      setSleepCycles(cycles);
-      
-      // Generate personalized recommendation if chronotype is known
-      if (chronotype !== 'unknown') {
-        const recommendation = getPersonalizedSleepRecommendation(
-          chronotype as Chronotype,
-          ageRange,
-          newBedtimes
-        );
-        setPersonalRecommendation(recommendation);
-      }
+    // If we're in bedToWake mode and have a chronotype
+    if (calculationType === 'bedToWake' && chronotype !== 'unknown') {
+      // Update recommendation based on selected wake time
+      const recommendation = getPersonalizedSleepRecommendation(
+        chronotype as Chronotype,
+        ageRange,
+        [time]
+      );
+      setPersonalRecommendation(recommendation);
     }
   };
   
-  // Update the state and productivity data when a bedtime is selected
-  const handleBedTimeSelect = (time: string) => {
-    // Parse the selected bedtime
-    const [hoursStr, minutesStr] = time.split(':');
-    const [minutes, period] = minutesStr.split(' ');
+  // Handle when a bedtime is selected (from wakeToBed mode)
+  const handleBedTimeSelect = (time: string, index: number) => {
+    // Set a flag to skip the main useEffect
+    skipMainEffect.current = true;
+    setSelectedBedTimeIndex(index);
+    setSelectedWakeTimeIndex(null);
+    setSelectedTime(time);
     
-    let hours = parseInt(hoursStr);
-    if (period === 'PM' && hours < 12) hours += 12;
-    if (period === 'AM' && hours === 12) hours = 0;
+    const selectedBedTime = timeStringToDate(time);
     
-    const selectedBedTime = new Date();
-    selectedBedTime.setHours(hours);
-    selectedBedTime.setMinutes(parseInt(minutes));
-    
-    // Update bed time
-    setBedTime(selectedBedTime);
-    
-    // If in wakeToBed mode and we have a wake-up time, update all calculations
-    if (calculationType === 'wakeToBed' && wakeUpTime) {
-      // Calculate sleep duration for this specific bedtime
-      const duration = calculateSleepDuration(selectedBedTime, wakeUpTime);
-      const cycleCount = getSleepCycles(selectedBedTime, wakeUpTime);
+    // For wakeToBed mode, we need to simulate what the wake-up time would be
+    // if the user went to bed at this time
+    if (calculationType === 'wakeToBed') {
+      // Calculate the corresponding wake time (assuming 5 sleep cycles)
+      const simulatedWakeUpDate = new Date(selectedBedTime.getTime());
+      // 14 min to fall asleep + 90 min per cycle * 5 cycles = 464 minutes
+      simulatedWakeUpDate.setMinutes(simulatedWakeUpDate.getMinutes() + 464);
       
-      // We're setting these as arrays with a single item because our UI expects arrays
-      setSleepDurations([duration]);
-      setSleepCycles([cycleCount]);
+      // Calculate new productivity periods based on this simulated wake-up time
+      const newDeepWorkPeriods = calculateDeepWorkPeriods(simulatedWakeUpDate);
+      const newAfternoonSlump = calculateAfternoonSlump(simulatedWakeUpDate);
+      const newNapTime = calculateNapTime(simulatedWakeUpDate);
       
-      // Update productivity periods based on the wake-up time
-      setDeepWorkPeriods(calculateDeepWorkPeriods(wakeUpTime));
-      setAfternoonSlump(calculateAfternoonSlump(wakeUpTime));
-      setNapTime(calculateNapTime(wakeUpTime));
+      // Force a direct state update
+      setDeepWorkPeriods([...newDeepWorkPeriods]);
+      setAfternoonSlump(newAfternoonSlump);
+      setNapTime(newNapTime);
       
       // Calculate nap duration
-      const napTimeDate = new Date(wakeUpTime);
-      const napHours = new Date(napTimeDate.getTime() + 6.5 * 60 * 60 * 1000).getHours();
-      const napMins = new Date(napTimeDate.getTime() + 6.5 * 60 * 60 * 1000).getMinutes();
+      const napTimeDate = new Date(simulatedWakeUpDate);
       const napDateTime = new Date();
-      napDateTime.setHours(napHours);
-      napDateTime.setMinutes(napMins);
+      napDateTime.setHours(napTimeDate.getHours() + 6);
+      napDateTime.setMinutes(napTimeDate.getMinutes() + 30);
       setNapDuration(getIdealNapDuration(napDateTime));
       
-      // Update recommendation
+      // Update personalized recommendation if chronotype is known
       if (chronotype !== 'unknown') {
         const recommendation = getPersonalizedSleepRecommendation(
           chronotype as Chronotype,
           ageRange,
           [time]
-        );
-        setPersonalRecommendation(recommendation);
-      }
-    } 
-    // If in bedToWake mode, calculate new wake-up times and update all calculations
-    else if (calculationType === 'bedToWake') {
-      // Calculate new wake-up times
-      const newWakeUpTimes = calculateWakeUpTimes(selectedBedTime);
-      setWakeUpTimes(newWakeUpTimes);
-      
-      // Calculate sleep durations and cycles for each wake-up time
-      const durations: string[] = [];
-      const cycles: number[] = [];
-      
-      newWakeUpTimes.forEach((wakeTimeStr) => {
-        const duration = calculateSleepDuration(selectedBedTime, wakeTimeStr);
-        durations.push(duration);
-        
-        const cycleCount = getSleepCycles(selectedBedTime, wakeTimeStr);
-        cycles.push(cycleCount);
-      });
-      
-      setWakeUpSleepDurations(durations);
-      setWakeUpSleepCycles(cycles);
-      
-      // Get the best wake up time
-      const best = getBestWakeTime(selectedBedTime);
-      setBestWakeUpTime(best);
-      
-      // Calculate productivity periods based on the best wake-up time
-      const bestWakeTimeParts = best.split(':');
-      const [bestWakeTimeHours, bestWakeTimeMinutesWithPeriod] = bestWakeTimeParts;
-      const [bestWakeTimeMinutes, bestPeriod] = bestWakeTimeMinutesWithPeriod.split(' ');
-      
-      let bestHours = parseInt(bestWakeTimeHours);
-      if (bestPeriod === 'PM' && bestHours < 12) bestHours += 12;
-      if (bestPeriod === 'AM' && bestHours === 12) bestHours = 0;
-      
-      const bestWakeTimeDate = new Date();
-      bestWakeTimeDate.setHours(bestHours);
-      bestWakeTimeDate.setMinutes(parseInt(bestWakeTimeMinutes));
-      
-      // Use the best wake time to calculate productivity periods
-      setDeepWorkPeriods(calculateDeepWorkPeriods(bestWakeTimeDate));
-      setAfternoonSlump(calculateAfternoonSlump(bestWakeTimeDate));
-      setNapTime(calculateNapTime(bestWakeTimeDate));
-      
-      // Calculate nap duration
-      const napTimeDate = new Date(bestWakeTimeDate);
-      const napHours = new Date(napTimeDate.getTime() + 6.5 * 60 * 60 * 1000).getHours();
-      const napMins = new Date(napTimeDate.getTime() + 6.5 * 60 * 60 * 1000).getMinutes();
-      const napDateTime = new Date();
-      napDateTime.setHours(napHours);
-      napDateTime.setMinutes(napMins);
-      setNapDuration(getIdealNapDuration(napDateTime));
-      
-      // Generate personalized recommendation if chronotype is known
-      if (chronotype !== 'unknown') {
-        const recommendation = getPersonalizedSleepRecommendation(
-          chronotype as Chronotype,
-          ageRange,
-          newWakeUpTimes
         );
         setPersonalRecommendation(recommendation);
       }
@@ -588,6 +520,7 @@ export default function SleepCalculator() {
                 sleepDurations={sleepDurations}
                 cycles={sleepCycles}
                 onSelect={handleBedTimeSelect}
+                selectedIndex={selectedBedTimeIndex}
               />
             )}
             
@@ -602,6 +535,7 @@ export default function SleepCalculator() {
                 onSelect={handleWakeTimeSelect}
                 sleepDurations={wakeUpSleepDurations}
                 cycles={wakeUpSleepCycles}
+                selectedIndex={selectedWakeTimeIndex}
               />
             )}
             
@@ -636,6 +570,22 @@ export default function SleepCalculator() {
                 icon={<Icons.Nap />}
                 accent="cyan"
               />
+            )}
+            
+            {/* Selected Time Note */}
+            {selectedTime && (
+              <div className="card-cosmic p-3 md:p-4 rounded-xl shadow-sm border-violet-500/20 bg-violet-900/20">
+                <div>
+                  <p className="text-sm text-indigo-200 mb-2">
+                    <span className="text-violet-300 font-medium">Note:</span> The productivity periods have been updated based on your selected {
+                      selectedBedTimeIndex !== null ? 'bedtime' : 'wake-up time'
+                    } ({selectedTime}).
+                  </p>
+                  <p className="text-xs text-indigo-300/70">
+                    {selectedBedTimeIndex !== null && calculationType === 'wakeToBed' && 'Showing productivity periods as if you went to bed at this time and slept for 5 complete sleep cycles (7.5 hours).'}
+                  </p>
+                </div>
+              </div>
             )}
           </div>
         )}
