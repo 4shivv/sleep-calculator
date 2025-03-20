@@ -24,7 +24,7 @@ export default function SleepResults({
   items, 
   description, 
   icon, 
-  accent, 
+  accent = 'violet',
   onSelect,
   sleepDurations = [],
   cycles = [],
@@ -119,9 +119,9 @@ export default function SleepResults({
   if (items.length === 0) return null;
   
   return (
-    <div className="sleep-results-card">
+    <div className={`sleep-results-card border-${accent}-500/20`}>
       <div 
-        className="sleep-results-header"
+        className={`sleep-results-header bg-${accent}-500/05 hover:bg-${accent}-500/10`}
         onClick={toggleExpanded}
       >
         <div className="flex items-center gap-3">
