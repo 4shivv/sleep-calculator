@@ -70,9 +70,12 @@ export default function SleepResults({
               <li 
                 key={index}
                 className={`sleep-results-item ${
-                  onSelect ? 'cursor-pointer' : ''
+                  onSelect ? 'cursor-pointer transition-all hover:bg-violet-500/20 hover:shadow-md hover:translate-y-0' : ''
                 }`}
                 onClick={() => onSelect && onSelect(item)}
+                role={onSelect ? "button" : undefined}
+                tabIndex={onSelect ? 0 : undefined}
+                aria-label={onSelect ? `Select ${item}` : undefined}
               >
                 <div className="flex flex-col md:flex-row md:items-center md:gap-4 flex-grow">
                   <span className="sleep-results-time text-violet-100">{item}</span>
@@ -101,15 +104,17 @@ export default function SleepResults({
                 </div>
                 
                 {onSelect && (
-                  <button 
-                    className="sleep-results-select-button mt-2 md:mt-0"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onSelect(item);
-                    }}
-                  >
-                    Select
-                  </button>
+                  <div className="flex justify-end mt-2 md:mt-0">
+                    <svg 
+                      xmlns="http://www.w3.org/2000/svg" 
+                      className="h-5 w-5 text-violet-400" 
+                      fill="none" 
+                      viewBox="0 0 24 24" 
+                      stroke="currentColor"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
                 )}
               </li>
             ))}

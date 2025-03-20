@@ -245,7 +245,7 @@ export default function SleepCalculator() {
     setPersonalRecommendation('');
   };
   
-  // Update deep work periods when wake time is selected from bedToWake calculation
+  // Update the state and productivity data when a wake time is selected
   const handleWakeTimeSelect = (time: string) => {
     // Parse the selected wake time
     const [hoursStr, minutesStr] = time.split(':');
@@ -273,6 +273,173 @@ export default function SleepCalculator() {
     napDateTime.setHours(napHours);
     napDateTime.setMinutes(napMins);
     setNapDuration(getIdealNapDuration(napDateTime));
+    
+    // If in bedToWake mode and have a bedTime, update all calculations
+    if (calculationType === 'bedToWake' && bedTime) {
+      // Calculate sleep duration for this specific wake-up time
+      const duration = calculateSleepDuration(bedTime, selectedWakeTime);
+      const cycleCount = getSleepCycles(bedTime, selectedWakeTime);
+      
+      // Update the sleep duration and cycles (in arrays with single item)
+      setWakeUpSleepDurations([duration]);
+      setWakeUpSleepCycles([cycleCount]);
+      
+      // Update recommendation based on selected wake time if chronotype is known
+      if (chronotype !== 'unknown') {
+        const recommendation = getPersonalizedSleepRecommendation(
+          chronotype as Chronotype,
+          ageRange,
+          [time]
+        );
+        setPersonalRecommendation(recommendation);
+      }
+    } 
+    // If in wakeToBed mode, calculate new bedtimes and update all calculations
+    else if (calculationType === 'wakeToBed') {
+      // Calculate new bedtimes
+      const newBedtimes = calculateBedtimes(selectedWakeTime);
+      setBedtimes(newBedtimes);
+      
+      // Calculate sleep durations and cycles for each bedtime
+      const durations: string[] = [];
+      const cycles: number[] = [];
+      
+      newBedtimes.forEach((bedtimeStr) => {
+        const duration = calculateSleepDuration(bedtimeStr, selectedWakeTime);
+        durations.push(duration);
+        
+        const cycleCount = getSleepCycles(bedtimeStr, selectedWakeTime);
+        cycles.push(cycleCount);
+      });
+      
+      setSleepDurations(durations);
+      setSleepCycles(cycles);
+      
+      // Generate personalized recommendation if chronotype is known
+      if (chronotype !== 'unknown') {
+        const recommendation = getPersonalizedSleepRecommendation(
+          chronotype as Chronotype,
+          ageRange,
+          newBedtimes
+        );
+        setPersonalRecommendation(recommendation);
+      }
+    }
+  };
+  
+  // Update the state and productivity data when a bedtime is selected
+  const handleBedTimeSelect = (time: string) => {
+    // Parse the selected bedtime
+    const [hoursStr, minutesStr] = time.split(':');
+    const [minutes, period] = minutesStr.split(' ');
+    
+    let hours = parseInt(hoursStr);
+    if (period === 'PM' && hours < 12) hours += 12;
+    if (period === 'AM' && hours === 12) hours = 0;
+    
+    const selectedBedTime = new Date();
+    selectedBedTime.setHours(hours);
+    selectedBedTime.setMinutes(parseInt(minutes));
+    
+    // Update bed time
+    setBedTime(selectedBedTime);
+    
+    // If in wakeToBed mode and we have a wake-up time, update all calculations
+    if (calculationType === 'wakeToBed' && wakeUpTime) {
+      // Calculate sleep duration for this specific bedtime
+      const duration = calculateSleepDuration(selectedBedTime, wakeUpTime);
+      const cycleCount = getSleepCycles(selectedBedTime, wakeUpTime);
+      
+      // We're setting these as arrays with a single item because our UI expects arrays
+      setSleepDurations([duration]);
+      setSleepCycles([cycleCount]);
+      
+      // Update productivity periods based on the wake-up time
+      setDeepWorkPeriods(calculateDeepWorkPeriods(wakeUpTime));
+      setAfternoonSlump(calculateAfternoonSlump(wakeUpTime));
+      setNapTime(calculateNapTime(wakeUpTime));
+      
+      // Calculate nap duration
+      const napTimeDate = new Date(wakeUpTime);
+      const napHours = new Date(napTimeDate.getTime() + 6.5 * 60 * 60 * 1000).getHours();
+      const napMins = new Date(napTimeDate.getTime() + 6.5 * 60 * 60 * 1000).getMinutes();
+      const napDateTime = new Date();
+      napDateTime.setHours(napHours);
+      napDateTime.setMinutes(napMins);
+      setNapDuration(getIdealNapDuration(napDateTime));
+      
+      // Update recommendation
+      if (chronotype !== 'unknown') {
+        const recommendation = getPersonalizedSleepRecommendation(
+          chronotype as Chronotype,
+          ageRange,
+          [time]
+        );
+        setPersonalRecommendation(recommendation);
+      }
+    } 
+    // If in bedToWake mode, calculate new wake-up times and update all calculations
+    else if (calculationType === 'bedToWake') {
+      // Calculate new wake-up times
+      const newWakeUpTimes = calculateWakeUpTimes(selectedBedTime);
+      setWakeUpTimes(newWakeUpTimes);
+      
+      // Calculate sleep durations and cycles for each wake-up time
+      const durations: string[] = [];
+      const cycles: number[] = [];
+      
+      newWakeUpTimes.forEach((wakeTimeStr) => {
+        const duration = calculateSleepDuration(selectedBedTime, wakeTimeStr);
+        durations.push(duration);
+        
+        const cycleCount = getSleepCycles(selectedBedTime, wakeTimeStr);
+        cycles.push(cycleCount);
+      });
+      
+      setWakeUpSleepDurations(durations);
+      setWakeUpSleepCycles(cycles);
+      
+      // Get the best wake up time
+      const best = getBestWakeTime(selectedBedTime);
+      setBestWakeUpTime(best);
+      
+      // Calculate productivity periods based on the best wake-up time
+      const bestWakeTimeParts = best.split(':');
+      const [bestWakeTimeHours, bestWakeTimeMinutesWithPeriod] = bestWakeTimeParts;
+      const [bestWakeTimeMinutes, bestPeriod] = bestWakeTimeMinutesWithPeriod.split(' ');
+      
+      let bestHours = parseInt(bestWakeTimeHours);
+      if (bestPeriod === 'PM' && bestHours < 12) bestHours += 12;
+      if (bestPeriod === 'AM' && bestHours === 12) bestHours = 0;
+      
+      const bestWakeTimeDate = new Date();
+      bestWakeTimeDate.setHours(bestHours);
+      bestWakeTimeDate.setMinutes(parseInt(bestWakeTimeMinutes));
+      
+      // Use the best wake time to calculate productivity periods
+      setDeepWorkPeriods(calculateDeepWorkPeriods(bestWakeTimeDate));
+      setAfternoonSlump(calculateAfternoonSlump(bestWakeTimeDate));
+      setNapTime(calculateNapTime(bestWakeTimeDate));
+      
+      // Calculate nap duration
+      const napTimeDate = new Date(bestWakeTimeDate);
+      const napHours = new Date(napTimeDate.getTime() + 6.5 * 60 * 60 * 1000).getHours();
+      const napMins = new Date(napTimeDate.getTime() + 6.5 * 60 * 60 * 1000).getMinutes();
+      const napDateTime = new Date();
+      napDateTime.setHours(napHours);
+      napDateTime.setMinutes(napMins);
+      setNapDuration(getIdealNapDuration(napDateTime));
+      
+      // Generate personalized recommendation if chronotype is known
+      if (chronotype !== 'unknown') {
+        const recommendation = getPersonalizedSleepRecommendation(
+          chronotype as Chronotype,
+          ageRange,
+          newWakeUpTimes
+        );
+        setPersonalRecommendation(recommendation);
+      }
+    }
   };
   
   // Generate chronotype recommendations if available
@@ -420,6 +587,7 @@ export default function SleepCalculator() {
                 accent="violet"
                 sleepDurations={sleepDurations}
                 cycles={sleepCycles}
+                onSelect={handleBedTimeSelect}
               />
             )}
             
