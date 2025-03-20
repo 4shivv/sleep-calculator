@@ -545,6 +545,7 @@ button {
   width: 12px;
   height: 12px;
   opacity: 0.9;
+  flex-shrink: 0;
 }
 
 .sleep-results-badge:hover {
@@ -814,8 +815,48 @@ button {
     margin-bottom: var(--space-2);
   }
   
+  .sleep-results-badges {
+    gap: 4px;
+    margin-top: 4px;
+  }
+  
   .sleep-results-badge {
-    font-size: 0.625rem; /* Smaller on mobile */
+    font-size: 10px;
+    padding: 3px 6px;
+    min-height: 24px;
+    touch-action: manipulation;
+    max-width: 100%; /* Ensure badges don't overflow container */
+  }
+  
+  .sleep-results-badge .badge-text {
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  /* Increase touch target size */
+  .sleep-results-badge:hover,
+  .sleep-results-badge:active {
+    background: rgba(139, 92, 246, 0.3);
+  }
+  
+  /* Stack badges vertically on very small screens */
+  @media (max-width: 360px) {
+    .sleep-results-badges {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    
+    .sleep-results-badge {
+      width: 100%;
+      justify-content: flex-start;
+    }
+    
+    .sleep-results-badge .badge-text {
+      max-width: none;
+      white-space: normal;
+    }
   }
 }
 
