@@ -74,11 +74,3 @@ This calculator is built on evidence-based sleep research:
 4. View your personalized sleep recommendations and productivity schedule
 5. If using the bedtime calculator, you can select any wake-up time to see productivity recommendations
 
-## Deployment
-
-The app can be easily deployed to platforms like Vercel or Netlify:
-
-```bash
-npm run build
-```
-
