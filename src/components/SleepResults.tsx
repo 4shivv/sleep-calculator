@@ -30,6 +30,13 @@ export default function SleepResults({
 }: SleepResultsProps) {
   const [expanded, setExpanded] = useState(true);
   
+  // Handle selection for both click and touch events
+  const handleSelect = (item: string, index: number) => {
+    if (onSelect) {
+      onSelect(item, index);
+    }
+  };
+  
   if (items.length === 0) return null;
   
   return (
@@ -79,10 +86,12 @@ export default function SleepResults({
                   className={`sleep-results-item ${
                     onSelect ? 'cursor-pointer transition-all hover:bg-violet-500/20 hover:shadow-md hover:translate-y-0' : ''
                   } ${isSelected ? 'bg-violet-500/30 border-violet-500/50 shadow-md transform -translate-y-px' : ''}`}
-                  onClick={() => {
-                    if (onSelect) {
-                      onSelect(item, index);
-                    }
+                  onClick={() => handleSelect(item, index)}
+                  onTouchStart={(e) => e.stopPropagation()}
+                  onTouchEnd={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleSelect(item, index);
                   }}
                   role={onSelect ? "button" : undefined}
                   tabIndex={onSelect ? 0 : undefined}
@@ -91,7 +100,7 @@ export default function SleepResults({
                   onKeyDown={(e) => {
                     if (onSelect && (e.key === 'Enter' || e.key === ' ')) {
                       e.preventDefault();
-                      onSelect(item, index);
+                      handleSelect(item, index);
                     }
                   }}
                 >
