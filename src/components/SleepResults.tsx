@@ -13,6 +13,7 @@ interface SleepResultsProps {
   cycles?: number[];
   selectedIndex?: number | null;
   extraInfo?: string[];
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   bestWakeUpTime?: string;
 }
 
@@ -28,6 +29,7 @@ export default function SleepResults({
   cycles = [],
   selectedIndex = null,
   extraInfo = [],
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   bestWakeUpTime,
 }: SleepResultsProps) {
   const [expanded, setExpanded] = useState(true);
