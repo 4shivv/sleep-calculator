@@ -519,7 +519,7 @@ export default function SleepCalculator() {
         setLoading(false);
       }, 600);
     }
-  }, [calculationType, wakeUpTime, bedTime, chronotype, ageRange]);
+  }, [calculationType, wakeUpTime, bedTime, chronotype, ageRange, calculateMultipleTimeOptions]);
   
   // Handle calculation type change
   const handleTypeChange = (type: CalculationType) => {
