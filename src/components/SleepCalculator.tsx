@@ -66,12 +66,14 @@ const Icons = {
 };
 
 export default function SleepCalculator() {
+  // Force rerender counter (incremented to force Chrome mobile rendering)
+  const [renderCount, forceRender] = useReducer(x => x + 1, 0);
+  
   const [calculationType, setCalculationType] = useState<CalculationType>('wakeToBed');
   const [wakeUpTime, setWakeUpTime] = useState<Date | null>(null);
   const [bedTime, setBedTime] = useState<Date | null>(null);
   const [chronotype, setChronotype] = useState<ChronotypeOption>('intermediate'); // Set intermediate as default
   const [ageRange, setAgeRange] = useState<AgeRange>('adult');
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [bestWakeUpTime, setBestWakeUpTime] = useState<string>('');
   const [napDurations, setNapDurations] = useState<string[]>([]);
   const [personalRecommendation, setPersonalRecommendation] = useState<string>('');
@@ -94,22 +96,21 @@ export default function SleepCalculator() {
   const [wakeUpSleepDurations, setWakeUpSleepDurations] = useState<string[]>([]);
   const [wakeUpSleepCycles, setWakeUpSleepCycles] = useState<number[]>([]);
   
-  // Add a simple way to force component re-renders
-  const [, forceRender] = useReducer(x => x + 1, 0);
+  // Is it mobile Chrome?
+  const [isMobileChrome, setIsMobileChrome] = useState(false);
   
-  const forceUpdate = useCallback(() => {
-    forceRender();
+  // Check mobile browser on mount
+  useEffect(() => {
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const isChrome = /Chrome/i.test(navigator.userAgent) && !/Edge|Edg/i.test(navigator.userAgent);
+    setIsMobileChrome(isMobile && isChrome);
   }, []);
+  
+  // Reference to container element for forced repainting
+  const containerRef = useRef<HTMLDivElement>(null);
   
   // Flag to disable main useEffect temporarily
   const skipMainEffect = useRef(false);
-  
-  // Check if we're on a mobile device
-  const [isMobile, setIsMobile] = useState(false);
-  
-  useEffect(() => {
-    setIsMobile(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
-  }, []);
   
   // Helper function to convert a time string to a Date object
   const timeStringToDate = (timeStr: string): Date => {
@@ -207,6 +208,20 @@ export default function SleepCalculator() {
       }
     }
   };
+  
+  // Force a mobile browser repaint
+  const forceRepaint = useCallback(() => {
+    if (containerRef.current && isMobileChrome) {
+      // This trick forces Chrome to recalculate layout and repaint
+      containerRef.current.style.display = 'none';
+      // Force reflow
+      void containerRef.current.offsetHeight;
+      containerRef.current.style.display = '';
+      
+      // Additionally force a React rerender
+      forceRender();
+    }
+  }, [isMobileChrome]);
   
   // Helper to calculate multiple nap times and energy dips
   const calculateMultipleTimeOptions = useCallback((wakeTime: Date, deficitLevel: SleepDeficitLevel) => {
@@ -431,7 +446,7 @@ export default function SleepCalculator() {
             );
           }
           
-          // Batch all state updates to reduce rerenders
+          // Update all states
           setBedtimes(adjustedBedtimes);
           setSleepDurations(durations);
           setSleepCycles(cycles);
@@ -447,12 +462,18 @@ export default function SleepCalculator() {
           setWakeUpSleepDurations([]);
           setWakeUpSleepCycles([]);
           setBestWakeUpTime('');
+          
+          // Force a rerender for mobile browsers
+          if (isMobileChrome) {
+            requestAnimationFrame(() => {
+              forceRender();
+              forceRepaint();
+            });
+          }
         } catch (error) {
           console.error('Error calculating wakeToBed:', error);
         } finally {
           setLoading(false);
-          // Force a rerender to ensure UI consistency
-          if (isMobile) forceUpdate();
         }
       }, 600);
     } else if (calculationType === 'bedToWake' && bedTime) {
@@ -524,7 +545,7 @@ export default function SleepCalculator() {
             );
           }
           
-          // Batch all state updates to reduce rerenders
+          // Update all states
           setWakeUpTimes(adjustedWakeUpTimes);
           setWakeUpSleepDurations(durations);
           setWakeUpSleepCycles(cycles);
@@ -540,16 +561,22 @@ export default function SleepCalculator() {
           setBedtimes([]);
           setSleepDurations([]);
           setSleepCycles([]);
+          
+          // Force a rerender for mobile browsers
+          if (isMobileChrome) {
+            requestAnimationFrame(() => {
+              forceRender();
+              forceRepaint();
+            });
+          }
         } catch (error) {
           console.error('Error calculating bedToWake:', error);
         } finally {
           setLoading(false);
-          // Force a rerender to ensure UI consistency
-          if (isMobile) forceUpdate();
         }
       }, 600);
     }
-  }, [calculationType, wakeUpTime, bedTime, chronotype, ageRange, calculateMultipleTimeOptions, isMobile, forceUpdate]);
+  }, [calculationType, wakeUpTime, bedTime, chronotype, ageRange, calculateMultipleTimeOptions, isMobileChrome, forceRepaint]);
   
   // Handle calculation type change
   const handleTypeChange = (type: CalculationType) => {
@@ -575,123 +602,141 @@ export default function SleepCalculator() {
     setSleepDeficitLevel('none');
   };
   
-  // Enhanced Wake Time Selection Handler
+  // Handle when a wake time is selected
   const handleWakeTimeSelect = (time: string, index: number) => {
     console.log(`Wake time selected: ${time} at index ${index}`);
     
     // Set a flag to skip the main useEffect
     skipMainEffect.current = true;
     
-    // Update selection states immediately with new values
+    // First update selection state quickly
     setSelectedWakeTimeIndex(index);
     setSelectedBedTimeIndex(null);
     setSelectedTime(time);
     
-    // Force immediate UI update for mobile
-    setTimeout(() => {
-      // Convert the selected time string to a Date object
-      const selectedWakeTime = timeStringToDate(time);
-      
-      // Check sleep deficit level with this selection
-      const deficitLevel = checkSleepDeficiency(wakeUpSleepDurations[index], ageRange);
-      
-      // Calculate new productivity periods and other data
-      const newDeepWorkPeriods = calculateDeepWorkPeriods(selectedWakeTime);
-      const { 
-        energyDips: newEnergyDips, 
-        napTimes: newNapTimes, 
-        napDurations: newNapDurations 
-      } = calculateMultipleTimeOptions(selectedWakeTime, deficitLevel);
-      
-      // Batch all updates together to ensure they happen in the same render cycle
-      setSleepDeficitLevel(deficitLevel);
-      setDeepWorkPeriods([...newDeepWorkPeriods]);
-      setEnergyDips([...newEnergyDips]);
-      setNapTimes([...newNapTimes]);
-      setNapDurations([...newNapDurations]);
-      
-      // Update recommendation if applicable
-      if (calculationType === 'bedToWake' && chronotype !== 'unknown') {
-        const recommendation = getPersonalizedSleepRecommendation(
-          chronotype as Chronotype,
-          ageRange,
-          [time]
-        );
-        setPersonalRecommendation(recommendation);
+    // Calculate all updates in requestAnimationFrame for better mobile performance
+    requestAnimationFrame(() => {
+      try {
+        // Convert the selected time string to a Date object
+        const selectedWakeTime = timeStringToDate(time);
+        
+        // Check sleep deficit level with this selection
+        const deficitLevel = checkSleepDeficiency(wakeUpSleepDurations[index], ageRange);
+        
+        // Calculate new productivity periods based on this wake-up time
+        const newDeepWorkPeriods = calculateDeepWorkPeriods(selectedWakeTime);
+        
+        // Calculate multiple energy dips and nap times
+        const { 
+          energyDips: newEnergyDips, 
+          napTimes: newNapTimes, 
+          napDurations: newNapDurations 
+        } = calculateMultipleTimeOptions(selectedWakeTime, deficitLevel);
+        
+        // Update recommendation if applicable
+        let newRecommendation = personalRecommendation;
+        if (calculationType === 'bedToWake' && chronotype !== 'unknown') {
+          newRecommendation = getPersonalizedSleepRecommendation(
+            chronotype as Chronotype,
+            ageRange,
+            [time]
+          );
+        }
+        
+        // Batch updates in a microtask to avoid React batching issues
+        setTimeout(() => {
+          // Update all states
+          setSleepDeficitLevel(deficitLevel);
+          setDeepWorkPeriods(newDeepWorkPeriods);
+          setEnergyDips(newEnergyDips);
+          setNapTimes(newNapTimes);
+          setNapDurations(newNapDurations);
+          setPersonalRecommendation(newRecommendation);
+          
+          // Force update on Chrome mobile
+          forceRender();
+          
+          // Force layout recalculation for Chrome mobile
+          if (isMobileChrome) {
+            forceRepaint();
+          }
+        }, 0);
+      } catch (error) {
+        console.error('Error in handleWakeTimeSelect:', error);
       }
-      
-      // Force a rerender after all state updates
-      forceUpdate();
-      
-      console.log('State updated after wake time selection', {
-        newDeepWorkPeriods,
-        newEnergyDips,
-        newNapTimes
-      });
-    }, 10);
+    });
   };
   
-  // Enhanced Bed Time Selection Handler
+  // Handle when a bedtime is selected
   const handleBedTimeSelect = (time: string, index: number) => {
     console.log(`Bed time selected: ${time} at index ${index}`);
     
     // Set a flag to skip the main useEffect
     skipMainEffect.current = true;
     
-    // Update selection states immediately with new values
+    // First update selection state quickly
     setSelectedBedTimeIndex(index);
     setSelectedWakeTimeIndex(null);
     setSelectedTime(time);
     
-    // Force immediate UI update for mobile
-    setTimeout(() => {
-      const selectedBedTime = timeStringToDate(time);
-      
-      // Check sleep deficit level with this selection
-      const deficitLevel = checkSleepDeficiency(sleepDurations[index], ageRange);
-      
-      // For wakeToBed mode, we need to simulate what the wake-up time would be
-      if (calculationType === 'wakeToBed') {
-        // Calculate the corresponding wake time (assuming 5 sleep cycles)
-        const simulatedWakeUpDate = new Date(selectedBedTime.getTime());
-        // 14 min to fall asleep + 90 min per cycle * 5 cycles = 464 minutes
-        simulatedWakeUpDate.setMinutes(simulatedWakeUpDate.getMinutes() + 464);
+    // Calculate all updates in requestAnimationFrame for better mobile performance
+    requestAnimationFrame(() => {
+      try {
+        const selectedBedTime = timeStringToDate(time);
         
-        // Calculate new productivity periods and other data
-        const newDeepWorkPeriods = calculateDeepWorkPeriods(simulatedWakeUpDate);
-        const { 
-          energyDips: newEnergyDips, 
-          napTimes: newNapTimes, 
-          napDurations: newNapDurations 
-        } = calculateMultipleTimeOptions(simulatedWakeUpDate, deficitLevel);
+        // Check sleep deficit level with this selection
+        const deficitLevel = checkSleepDeficiency(sleepDurations[index], ageRange);
         
-        // Batch all updates together to ensure they happen in the same render cycle
-        setSleepDeficitLevel(deficitLevel);
-        setDeepWorkPeriods([...newDeepWorkPeriods]);
-        setEnergyDips([...newEnergyDips]);
-        setNapTimes([...newNapTimes]);
-        setNapDurations([...newNapDurations]);
-        
-        // Update recommendation if applicable
-        if (chronotype !== 'unknown') {
-          const recommendation = getPersonalizedSleepRecommendation(
-            chronotype as Chronotype,
-            ageRange,
-            [time]
-          );
-          setPersonalRecommendation(recommendation);
+        // Calculate all updates
+        if (calculationType === 'wakeToBed') {
+          // Calculate the corresponding wake time (assuming 5 sleep cycles)
+          const simulatedWakeUpDate = new Date(selectedBedTime.getTime());
+          // 14 min to fall asleep + 90 min per cycle * 5 cycles = 464 minutes
+          simulatedWakeUpDate.setMinutes(simulatedWakeUpDate.getMinutes() + 464);
+          
+          // Calculate new productivity periods based on this simulated wake-up time
+          const newDeepWorkPeriods = calculateDeepWorkPeriods(simulatedWakeUpDate);
+          
+          // Calculate multiple energy dips and nap times
+          const { 
+            energyDips: newEnergyDips, 
+            napTimes: newNapTimes, 
+            napDurations: newNapDurations 
+          } = calculateMultipleTimeOptions(simulatedWakeUpDate, deficitLevel);
+          
+          // Update recommendation if applicable
+          let newRecommendation = personalRecommendation;
+          if (chronotype !== 'unknown') {
+            newRecommendation = getPersonalizedSleepRecommendation(
+              chronotype as Chronotype,
+              ageRange,
+              [time]
+            );
+          }
+          
+          // Batch updates in a microtask to avoid React batching issues
+          setTimeout(() => {
+            // Update all states
+            setSleepDeficitLevel(deficitLevel);
+            setDeepWorkPeriods(newDeepWorkPeriods);
+            setEnergyDips(newEnergyDips);
+            setNapTimes(newNapTimes);
+            setNapDurations(newNapDurations);
+            setPersonalRecommendation(newRecommendation);
+            
+            // Force update on Chrome mobile
+            forceRender();
+            
+            // Force layout recalculation for Chrome mobile
+            if (isMobileChrome) {
+              forceRepaint();
+            }
+          }, 0);
         }
-        
-        // Force a rerender after all state updates
-        forceUpdate();
-        
-        console.log('State updated after bed time selection', {
-          newDeepWorkPeriods,
-          newEnergyDips, 
-          newNapTimes
-        });
+      } catch (error) {
+        console.error('Error in handleBedTimeSelect:', error);
       }
-    }, 10);
+    });
   };
   
   // Generate chronotype recommendations if available
@@ -714,7 +759,7 @@ export default function SleepCalculator() {
   };
   
   return (
-    <div className="sleep-calculator-container">
+    <div className="sleep-calculator-container" ref={containerRef} data-render-count={renderCount}>
       <div className="flex flex-col gap-4 md:gap-6">
         {/* Calculator Type Selector */}
         <div className="calculation-type-selector">
@@ -870,6 +915,7 @@ export default function SleepCalculator() {
                 cycles={sleepCycles}
                 onSelect={handleBedTimeSelect}
                 selectedIndex={selectedBedTimeIndex}
+                forceRender={renderCount}
               />
             )}
             
@@ -884,6 +930,7 @@ export default function SleepCalculator() {
                 sleepDurations={wakeUpSleepDurations}
                 cycles={wakeUpSleepCycles}
                 selectedIndex={selectedWakeTimeIndex}
+                forceRender={renderCount}
               />
             )}
             
@@ -894,6 +941,7 @@ export default function SleepCalculator() {
                 items={deepWorkPeriods}
                 icon={<Icons.Work />}
                 accent="purple"
+                forceRender={renderCount}
               />
             )}
             
@@ -905,6 +953,7 @@ export default function SleepCalculator() {
                 icon={<Icons.Slump />}
                 accent="blue"
                 description="These are times when your body naturally experiences energy dips due to circadian rhythm fluctuations."
+                forceRender={renderCount}
               />
             )}
             
@@ -919,6 +968,7 @@ export default function SleepCalculator() {
                   ? "Strategic nap recommendations to compensate for sleep deficit. 90-minute naps complete a full sleep cycle including REM sleep." 
                   : "Scientifically-timed nap options to boost alertness and cognitive performance."}
                 extraInfo={napDurations}
+                forceRender={renderCount}
               />
             )}
             

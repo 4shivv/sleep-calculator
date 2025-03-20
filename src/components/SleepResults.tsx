@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 interface SleepResultsProps {
   title: string;
@@ -13,6 +13,7 @@ interface SleepResultsProps {
   cycles?: number[];
   selectedIndex?: number | null;
   extraInfo?: string[];
+  forceRender?: number; // Add a prop to force rerender when parent updates
 }
 
 export default function SleepResults({ 
@@ -26,42 +27,54 @@ export default function SleepResults({
   sleepDurations = [],
   cycles = [],
   selectedIndex = null,
-  extraInfo = []
+  extraInfo = [],
+  forceRender = 0
 }: SleepResultsProps) {
   const [expanded, setExpanded] = useState(true);
-  const [isMobile, setIsMobile] = useState(false);
+  const [repaintTrigger, setRepaintTrigger] = useState(0);
+  const listRef = useRef<HTMLUListElement>(null);
   
-  // Detect mobile device on component mount
+  // Force a repaint when selected index changes
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
-    };
-    
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    
-    return () => {
-      window.removeEventListener('resize', checkMobile);
-    };
-  }, []);
-  
-  // Process selection
-  const handleSelect = (item: string, index: number, event?: React.MouseEvent | React.TouchEvent) => {
-    if (event) {
-      event.preventDefault();
-      event.stopPropagation();
-    }
-    
-    if (onSelect) {
-      // Delay slightly on mobile to ensure UI updates properly
-      if (isMobile) {
-        setTimeout(() => {
-          onSelect(item, index);
-        }, 50);
-      } else {
-        onSelect(item, index);
+    if (selectedIndex !== null) {
+      // Force a reflow by accessing element dimensions
+      if (listRef.current) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const height = listRef.current.offsetHeight;
       }
+      // Trigger a state change to force a rerender
+      setRepaintTrigger(prev => prev + 1);
     }
+  }, [selectedIndex, forceRender]);
+
+  // Process selection with force UI update
+  const handleSelect = (item: string, index: number) => {
+    if (!onSelect) return;
+    
+    // First trigger potential UI update
+    setRepaintTrigger(prev => prev + 1);
+    
+    // Use RAF to make sure UI updates in mobile browsers
+    requestAnimationFrame(() => {
+      onSelect(item, index);
+      
+      // Force mobile browser repaint by accessing DOM
+      if (listRef.current) {
+        listRef.current.style.opacity = '0.99';
+        setTimeout(() => {
+          if (listRef.current) {
+            listRef.current.style.opacity = '1';
+          }
+        }, 0);
+      }
+    });
+  };
+
+  // Handle expansion toggle with UI force update
+  const toggleExpanded = () => {
+    setExpanded(prev => !prev);
+    // Force mobile browser to repaint
+    setRepaintTrigger(prev => prev + 1);
   };
   
   if (items.length === 0) return null;
@@ -70,7 +83,7 @@ export default function SleepResults({
     <div className="sleep-results-card">
       <div 
         className="sleep-results-header"
-        onClick={() => setExpanded(!expanded)}
+        onClick={toggleExpanded}
       >
         <div className="flex items-center gap-3">
           {icon && <span className="text-xl glow-icon">{icon}</span>}
@@ -103,7 +116,11 @@ export default function SleepResults({
             </p>
           )}
           
-          <ul className="space-y-2.5">
+          <ul 
+            className="space-y-2.5"
+            ref={listRef}
+            data-repaint={repaintTrigger} // Help force repaints
+          >
             {items.map((item, index) => {
               const isSelected = selectedIndex === index;
               
@@ -113,25 +130,19 @@ export default function SleepResults({
                   className={`sleep-results-item ${
                     onSelect ? 'cursor-pointer transition-all hover:bg-violet-500/20 hover:shadow-md hover:translate-y-0' : ''
                   } ${isSelected ? 'bg-violet-500/30 border-violet-500/50 shadow-md transform -translate-y-px' : ''}`}
-                  data-index={index} /* Add data attribute for easier selection */
-                  onClick={(e) => onSelect && handleSelect(item, index, e)}
-                  onTouchStart={(e) => {
-                    if (onSelect) {
-                      // Mark this element as being touched for the touchend handler
-                      (e.currentTarget as HTMLElement).dataset.touched = "true";
-                      e.stopPropagation();
-                    }
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (onSelect) handleSelect(item, index);
                   }}
+                  // Special handling for iOS Safari
+                  onTouchStart={(e) => e.stopPropagation()}
                   onTouchEnd={(e) => {
-                    if (onSelect && (e.currentTarget as HTMLElement).dataset.touched === "true") {
-                      // Clean up the touched flag
-                      delete (e.currentTarget as HTMLElement).dataset.touched;
-                      handleSelect(item, index, e);
+                    if (onSelect) {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleSelect(item, index);
                     }
-                  }}
-                  onTouchCancel={(e) => {
-                    // Clean up the touched flag if the touch is canceled
-                    delete (e.currentTarget as HTMLElement).dataset.touched;
                   }}
                   role={onSelect ? "button" : undefined}
                   tabIndex={onSelect ? 0 : undefined}
