@@ -514,7 +514,6 @@ export default function SleepCalculator() {
               <SleepResults 
                 title="Optimal Bedtimes"
                 items={bedtimes}
-                description="Go to bed at one of these times for optimal sleep cycles and to wake up feeling refreshed."
                 icon={<Icons.Bed />}
                 accent="violet"
                 sleepDurations={sleepDurations}
@@ -528,10 +527,9 @@ export default function SleepCalculator() {
             {wakeUpTimes.length > 0 && (
               <SleepResults 
                 title="Optimal Wake-up Times"
-                items={wakeUpTimes}
-                description={bestWakeUpTime ? `The best wake-up time is ${bestWakeUpTime} (aligns with both sleep cycles and natural light).` : ''}
                 icon={<Icons.Wake />}
                 accent="indigo"
+                items={wakeUpTimes}
                 onSelect={handleWakeTimeSelect}
                 sleepDurations={wakeUpSleepDurations}
                 cycles={wakeUpSleepCycles}
@@ -544,7 +542,6 @@ export default function SleepCalculator() {
               <SleepResults 
                 title="Optimal Deep Work Periods"
                 items={deepWorkPeriods}
-                description="Schedule your most important tasks during these high alertness periods for maximum productivity."
                 icon={<Icons.Work />}
                 accent="purple"
               />
@@ -555,7 +552,6 @@ export default function SleepCalculator() {
               <SleepResults 
                 title="Afternoon Energy Dip"
                 items={[afternoonSlump]}
-                description="This is when your body naturally experiences an energy dip. Consider a short nap or lighter tasks during this period."
                 icon={<Icons.Slump />}
                 accent="blue"
               />
