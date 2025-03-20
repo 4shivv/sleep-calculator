@@ -7,8 +7,14 @@ import {
   calculateBedtimes, 
   calculateWakeUpTimes, 
   calculateDeepWorkPeriods,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  calculateAfternoonSlump,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  calculateNapTime,
   getRecommendedSleepDuration,
   getBestWakeTime,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  getIdealNapDuration,
   Chronotype,
   AgeRange,
   getChronotypeRecommendation,
@@ -71,6 +77,7 @@ export default function SleepCalculator() {
   const [bedTime, setBedTime] = useState<Date | null>(null);
   const [chronotype, setChronotype] = useState<ChronotypeOption>('intermediate'); // Set intermediate as default
   const [ageRange, setAgeRange] = useState<AgeRange>('adult');
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [bestWakeUpTime, setBestWakeUpTime] = useState<string>('');
   const [napDurations, setNapDurations] = useState<string[]>([]);
   const [personalRecommendation, setPersonalRecommendation] = useState<string>('');
