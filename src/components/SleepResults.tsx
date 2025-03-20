@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 
 interface SleepResultsProps {
   title: string;
@@ -13,7 +13,10 @@ interface SleepResultsProps {
   cycles?: number[];
   selectedIndex?: number | null;
   extraInfo?: string[];
-  forceRender?: number; // Add a prop to force rerender when parent updates
+  
+  // New props for controlling expansion from parent
+  forceExpanded?: boolean; // Override local expanded state
+  toggleCount?: number; // Change this to trigger an expand/collapse
 }
 
 export default function SleepResults({ 
@@ -28,54 +31,41 @@ export default function SleepResults({
   cycles = [],
   selectedIndex = null,
   extraInfo = [],
-  forceRender = 0
+  forceExpanded,
+  toggleCount = 0
 }: SleepResultsProps) {
+  // Track internal expanded state, but can be overridden by forceExpanded
   const [expanded, setExpanded] = useState(true);
-  const [repaintTrigger, setRepaintTrigger] = useState(0);
-  const listRef = useRef<HTMLUListElement>(null);
   
-  // Force a repaint when selected index changes
+  // Add a ref to track the previous toggle count
+  const [prevToggleCount, setPrevToggleCount] = useState(toggleCount);
+  
+  // Respond to toggleCount changes
   useEffect(() => {
-    if (selectedIndex !== null) {
-      // Force a reflow by accessing element dimensions
-      if (listRef.current) {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const height = listRef.current.offsetHeight;
-      }
-      // Trigger a state change to force a rerender
-      setRepaintTrigger(prev => prev + 1);
-    }
-  }, [selectedIndex, forceRender]);
-
-  // Process selection with force UI update
-  const handleSelect = (item: string, index: number) => {
-    if (!onSelect) return;
-    
-    // First trigger potential UI update
-    setRepaintTrigger(prev => prev + 1);
-    
-    // Use RAF to make sure UI updates in mobile browsers
-    requestAnimationFrame(() => {
-      onSelect(item, index);
+    if (toggleCount !== prevToggleCount) {
+      // Briefly collapse then expand to force a repaint
+      setExpanded(false);
       
-      // Force mobile browser repaint by accessing DOM
-      if (listRef.current) {
-        listRef.current.style.opacity = '0.99';
-        setTimeout(() => {
-          if (listRef.current) {
-            listRef.current.style.opacity = '1';
-          }
-        }, 0);
-      }
-    });
-  };
-
-  // Handle expansion toggle with UI force update
+      // Re-expand after a brief delay
+      const timer = setTimeout(() => {
+        setExpanded(true);
+        setPrevToggleCount(toggleCount);
+      }, 10);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [toggleCount, prevToggleCount]);
+  
+  // Handle expansion toggle
   const toggleExpanded = () => {
-    setExpanded(prev => !prev);
-    // Force mobile browser to repaint
-    setRepaintTrigger(prev => prev + 1);
+    // Only allow toggling if not being controlled externally
+    if (forceExpanded === undefined) {
+      setExpanded(prev => !prev);
+    }
   };
+  
+  // Determine if the component should be expanded
+  const isExpanded = forceExpanded !== undefined ? forceExpanded : expanded;
   
   if (items.length === 0) return null;
   
@@ -94,11 +84,11 @@ export default function SleepResults({
         
         <button 
           className="p-1 rounded-full hover:bg-violet-500/10 transition-colors"
-          aria-label={expanded ? "Collapse" : "Expand"}
+          aria-label={isExpanded ? "Collapse" : "Expand"}
         >
           <svg 
             xmlns="http://www.w3.org/2000/svg" 
-            className={`h-5 w-5 text-violet-300 transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`} 
+            className={`h-5 w-5 text-violet-300 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} 
             fill="none" 
             viewBox="0 0 24 24" 
             stroke="currentColor"
@@ -108,7 +98,7 @@ export default function SleepResults({
         </button>
       </div>
       
-      {expanded && (
+      {isExpanded && (
         <div className="sleep-results-body">
           {description && (
             <p className="sleep-results-description">
@@ -116,11 +106,7 @@ export default function SleepResults({
             </p>
           )}
           
-          <ul 
-            className="space-y-2.5"
-            ref={listRef}
-            data-repaint={repaintTrigger} // Help force repaints
-          >
+          <ul className="space-y-2.5">
             {items.map((item, index) => {
               const isSelected = selectedIndex === index;
               
@@ -133,15 +119,13 @@ export default function SleepResults({
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    if (onSelect) handleSelect(item, index);
+                    if (onSelect) onSelect(item, index);
                   }}
-                  // Special handling for iOS Safari
-                  onTouchStart={(e) => e.stopPropagation()}
                   onTouchEnd={(e) => {
                     if (onSelect) {
                       e.preventDefault();
                       e.stopPropagation();
-                      handleSelect(item, index);
+                      onSelect(item, index);
                     }
                   }}
                   role={onSelect ? "button" : undefined}
@@ -151,7 +135,7 @@ export default function SleepResults({
                   onKeyDown={(e) => {
                     if (onSelect && (e.key === 'Enter' || e.key === ' ')) {
                       e.preventDefault();
-                      handleSelect(item, index);
+                      onSelect(item, index);
                     }
                   }}
                 >
