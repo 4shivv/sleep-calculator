@@ -22,6 +22,7 @@ import {
 
 type CalculationType = 'wakeToBed' | 'bedToWake';
 type ChronotypeOption = Chronotype | 'unknown';
+type SleepDeficitLevel = 'none' | 'mild' | 'moderate' | 'severe';
 
 // Icons for different sections
 const Icons = {
@@ -71,23 +72,24 @@ export default function SleepCalculator() {
   const [calculationType, setCalculationType] = useState<CalculationType>('wakeToBed');
   const [wakeUpTime, setWakeUpTime] = useState<Date | null>(null);
   const [bedTime, setBedTime] = useState<Date | null>(null);
-  const [chronotype, setChronotype] = useState<ChronotypeOption>('unknown');
+  const [chronotype, setChronotype] = useState<ChronotypeOption>('intermediate'); // Set intermediate as default
   const [ageRange, setAgeRange] = useState<AgeRange>('adult');
   const [bestWakeUpTime, setBestWakeUpTime] = useState<string>('');
-  const [napDuration, setNapDuration] = useState<string>('');
+  const [napDurations, setNapDurations] = useState<string[]>([]);
   const [personalRecommendation, setPersonalRecommendation] = useState<string>('');
   
   // Selection states
   const [selectedWakeTimeIndex, setSelectedWakeTimeIndex] = useState<number | null>(null);
   const [selectedBedTimeIndex, setSelectedBedTimeIndex] = useState<number | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  const [sleepDeficitLevel, setSleepDeficitLevel] = useState<SleepDeficitLevel>('none');
   
   // Result states
   const [bedtimes, setBedtimes] = useState<string[]>([]);
   const [wakeUpTimes, setWakeUpTimes] = useState<string[]>([]);
   const [deepWorkPeriods, setDeepWorkPeriods] = useState<string[]>([]);
-  const [afternoonSlump, setAfternoonSlump] = useState<string>('');
-  const [napTime, setNapTime] = useState<string>('');
+  const [energyDips, setEnergyDips] = useState<string[]>([]);
+  const [napTimes, setNapTimes] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [sleepDurations, setSleepDurations] = useState<string[]>([]);
   const [sleepCycles, setSleepCycles] = useState<number[]>([]);
@@ -115,6 +117,240 @@ export default function SleepCalculator() {
     return date;
   };
   
+  // Helper to check sleep deficiency level
+  const checkSleepDeficiency = (sleepDurationStr: string, ageRange: AgeRange): SleepDeficitLevel => {
+    // Extract hours from sleep duration string (e.g., "7 hours 30 mins" -> 7.5)
+    const hourMatch = sleepDurationStr.match(/(\d+)\s*hours?/);
+    const minuteMatch = sleepDurationStr.match(/(\d+)\s*mins?/);
+    
+    let hours = hourMatch ? parseInt(hourMatch[1]) : 0;
+    const minutes = minuteMatch ? parseInt(minuteMatch[1]) : 0;
+    
+    // Convert to decimal hours
+    const totalHours = hours + (minutes / 60);
+    
+    // Get recommended hours based on age range
+    let minRecommendedHours = 7; // Default for adult
+    let optimalHours = 8; // Default optimal for adult
+    
+    if (ageRange === 'teen') {
+      minRecommendedHours = 8;
+      optimalHours = 9;
+    } else if (ageRange === 'adult') {
+      minRecommendedHours = 7;
+      optimalHours = 8;
+    } else if (ageRange === 'older-adult') {
+      minRecommendedHours = 7;
+      optimalHours = 7.5;
+    }
+    
+    // Determine deficit level
+    if (totalHours >= optimalHours) {
+      return 'none';
+    } else if (totalHours >= minRecommendedHours) {
+      return 'mild';
+    } else if (totalHours >= minRecommendedHours - 1.5) {
+      return 'moderate';
+    } else {
+      return 'severe';
+    }
+  };
+  
+  // Helper to get scientifically accurate nap recommendations
+  const getScientificNapRecommendation = (napTime: Date, deficitLevel: SleepDeficitLevel): string => {
+    const hours = napTime.getHours();
+    
+    // Base recommendations on time of day and sleep deficit
+    if (hours < 12) {
+      // Morning naps (before noon)
+      if (deficitLevel === 'severe') {
+        return "90 minutes (full sleep cycle) to address significant sleep deficit";
+      } else if (deficitLevel === 'moderate') {
+        return "20-30 minutes (refreshing without grogginess) or 90 minutes (full cycle)";
+      } else {
+        return "10-20 minutes (alertness boost without sleep inertia)";
+      }
+    } else if (hours < 15) {
+      // Early afternoon naps (12pm-3pm, optimal nap window)
+      if (deficitLevel === 'severe' || deficitLevel === 'moderate') {
+        return "90 minutes (complete sleep cycle with REM) for recovery";
+      } else if (deficitLevel === 'mild') {
+        return "30 minutes (some deep sleep) or 90 minutes (full cycle)";
+      } else {
+        return "20 minutes (optimal power nap) or 90 minutes (full cycle)";
+      }
+    } else if (hours < 17) {
+      // Late afternoon naps (3pm-5pm)
+      if (deficitLevel === 'severe') {
+        return "90 minutes (full sleep cycle) but may affect night sleep";
+      } else {
+        return "10-20 minutes (alertness without affecting night sleep)";
+      }
+    } else {
+      // Evening naps (after 5pm)
+      if (deficitLevel === 'severe') {
+        return "20-30 minutes maximum (avoid disrupting night sleep)";
+      } else {
+        return "10 minutes maximum (brief refresher only)";
+      }
+    }
+  };
+  
+  // Helper to calculate multiple nap times and energy dips
+  const calculateMultipleTimeOptions = (wakeUpTime: Date, deficitLevel: SleepDeficitLevel) => {
+    // Energy dips calculation based on circadian rhythm research
+    const energyDips = [];
+    
+    // Primary afternoon dip (occurs 6-8 hours after waking)
+    const postLunchDipStart = new Date(wakeUpTime);
+    postLunchDipStart.setHours(postLunchDipStart.getHours() + 6);
+    const postLunchDipEnd = new Date(postLunchDipStart);
+    postLunchDipEnd.setHours(postLunchDipEnd.getHours() + 2);
+    
+    // Evening dip (occurs 12-14 hours after waking)
+    const eveningDipStart = new Date(wakeUpTime);
+    eveningDipStart.setHours(eveningDipStart.getHours() + 12);
+    const eveningDipEnd = new Date(eveningDipStart);
+    eveningDipEnd.setHours(eveningDipEnd.getHours() + 2);
+    
+    // Format dips as strings
+    const postLunchDipStr = `${formatTime(postLunchDipStart)} - ${formatTime(postLunchDipEnd)}`;
+    const eveningDipStr = `${formatTime(eveningDipStart)} - ${formatTime(eveningDipEnd)}`;
+    
+    // Mid-morning dip (only for sleep deprived individuals)
+    let morningDipStr = '';
+    if (deficitLevel === 'moderate' || deficitLevel === 'severe') {
+      const morningDipStart = new Date(wakeUpTime);
+      morningDipStart.setHours(morningDipStart.getHours() + 3);
+      const morningDipEnd = new Date(morningDipStart);
+      morningDipEnd.setMinutes(morningDipEnd.getMinutes() + 60);
+      morningDipStr = `${formatTime(morningDipStart)} - ${formatTime(morningDipEnd)}`;
+    }
+    
+    // Order energy dips chronologically
+    if (morningDipStr) energyDips.push(morningDipStr);
+    energyDips.push(postLunchDipStr);
+    energyDips.push(eveningDipStr);
+    
+    // Calculate nap times based on circadian rhythms and sleep deficit
+    const napTimeObjects = [];
+    
+    // Late morning nap (4-5 hours after waking) for sleep deficient
+    if (deficitLevel === 'mild' || deficitLevel === 'moderate' || deficitLevel === 'severe') {
+      const morningNapTime = new Date(wakeUpTime);
+      morningNapTime.setHours(morningNapTime.getHours() + 4.5);
+      napTimeObjects.push({
+        time: morningNapTime,
+        duration: getScientificNapRecommendation(morningNapTime, deficitLevel)
+      });
+    }
+    
+    // Primary nap time (early afternoon, 6-7 hours after waking)
+    // This is the ideal nap time that aligns with natural circadian dip
+    const primaryNapTime = new Date(wakeUpTime);
+    primaryNapTime.setHours(primaryNapTime.getHours() + 6.5);
+    napTimeObjects.push({
+      time: primaryNapTime,
+      duration: getScientificNapRecommendation(primaryNapTime, deficitLevel)
+    });
+    
+    // Late afternoon nap (8-9 hours after waking)
+    if (deficitLevel === 'moderate' || deficitLevel === 'severe') {
+      const lateAfternoonNapTime = new Date(wakeUpTime);
+      lateAfternoonNapTime.setHours(lateAfternoonNapTime.getHours() + 8.5);
+      napTimeObjects.push({
+        time: lateAfternoonNapTime,
+        duration: getScientificNapRecommendation(lateAfternoonNapTime, deficitLevel)
+      });
+    }
+    
+    // Early evening nap (for severely sleep deprived)
+    if (deficitLevel === 'severe') {
+      const eveningNapTime = new Date(wakeUpTime);
+      eveningNapTime.setHours(eveningNapTime.getHours() + 11);
+      napTimeObjects.push({
+        time: eveningNapTime,
+        duration: getScientificNapRecommendation(eveningNapTime, deficitLevel)
+      });
+    }
+    
+    // Sort nap times chronologically
+    napTimeObjects.sort((a, b) => a.time.getTime() - b.time.getTime());
+    
+    // Extract sorted times and durations
+    const napTimes = napTimeObjects.map(obj => formatTime(obj.time));
+    const napDurations = napTimeObjects.map(obj => obj.duration);
+    
+    return {
+      energyDips,
+      napTimes,
+      napDurations
+    };
+  };
+  
+  // Helper to format a Date object to a time string (e.g., "2:30 PM")
+  const formatTime = (date: Date): string => {
+    const hours = date.getHours();
+    const minutes = date.getMinutes();
+    
+    // Convert to 12-hour format
+    const displayHours = hours % 12 || 12;
+    const period = hours >= 12 ? 'PM' : 'AM';
+    
+    return `${displayHours}:${minutes.toString().padStart(2, '0')} ${period}`;
+  };
+  
+  // Adjust times based on chronotype
+  const adjustTimesForChronotype = (times: string[], chronotype: ChronotypeOption): string[] => {
+    if (chronotype === 'unknown' || chronotype === 'intermediate') {
+      // No adjustment needed for intermediate or unknown
+      return times;
+    }
+    
+    // Convert all times to minutes since midnight
+    const minutesArray = times.map(time => {
+      const [hoursStr, minutesStr] = time.split(':');
+      const [minutes, period] = minutesStr.split(' ');
+      
+      let hours = parseInt(hoursStr);
+      if (period === 'PM' && hours < 12) hours += 12;
+      if (period === 'AM' && hours === 12) hours = 0;
+      
+      return hours * 60 + parseInt(minutes);
+    });
+    
+    // Sort minutes (earliest to latest)
+    minutesArray.sort((a, b) => a - b);
+    
+    // For early types (morning larks), prefer earlier times
+    if (chronotype === 'early') {
+      // Take the first 3-4 options (earlier times)
+      const earlyMinutes = minutesArray.slice(0, Math.min(4, minutesArray.length));
+      return earlyMinutes.map(minutes => {
+        const hours = Math.floor(minutes / 60);
+        const mins = minutes % 60;
+        const period = hours >= 12 ? 'PM' : 'AM';
+        const displayHours = hours % 12 || 12;
+        return `${displayHours}:${mins.toString().padStart(2, '0')} ${period}`;
+      });
+    }
+    
+    // For late types (night owls), prefer later times
+    if (chronotype === 'late') {
+      // Take the last 3-4 options (later times)
+      const lateMinutes = minutesArray.slice(-Math.min(4, minutesArray.length));
+      return lateMinutes.map(minutes => {
+        const hours = Math.floor(minutes / 60);
+        const mins = minutes % 60;
+        const period = hours >= 12 ? 'PM' : 'AM';
+        const displayHours = hours % 12 || 12;
+        return `${displayHours}:${mins.toString().padStart(2, '0')} ${period}`;
+      });
+    }
+    
+    return times; // fallback
+  };
+  
   // Calculate results when inputs change
   useEffect(() => {
     // Skip if we're handling a selected time
@@ -133,14 +369,20 @@ export default function SleepCalculator() {
       
       // Simulate a loading delay for better UX
       setTimeout(() => {
-        const newBedtimes = calculateBedtimes(wakeUpTime);
-        setBedtimes(newBedtimes);
+        // Calculate all possible bedtimes
+        const allBedtimes = calculateBedtimes(wakeUpTime);
+        
+        // Adjust bedtimes based on chronotype
+        const adjustedBedtimes = chronotype !== 'unknown' ? 
+          adjustTimesForChronotype(allBedtimes, chronotype) : allBedtimes;
+        
+        setBedtimes(adjustedBedtimes);
         
         // Calculate sleep durations and cycles for each bedtime
         const durations: string[] = [];
         const cycles: number[] = [];
         
-        newBedtimes.forEach((bedtimeStr) => {
+        adjustedBedtimes.forEach((bedtimeStr) => {
           const duration = calculateSleepDuration(bedtimeStr, wakeUpTime);
           durations.push(duration);
           
@@ -151,30 +393,28 @@ export default function SleepCalculator() {
         setSleepDurations(durations);
         setSleepCycles(cycles);
         
+        // Check sleep deficit level (use first bedtime which has most cycles)
+        const deficitLevel = checkSleepDeficiency(durations[0], ageRange);
+        setSleepDeficitLevel(deficitLevel);
+        
         // Calculate productivity periods based on wake-up time
         const newDeepWorkPeriods = calculateDeepWorkPeriods(wakeUpTime);
-        const newAfternoonSlump = calculateAfternoonSlump(wakeUpTime);
-        const newNapTime = calculateNapTime(wakeUpTime);
+        
+        // Calculate multiple energy dips and nap times
+        const { energyDips: newEnergyDips, napTimes: newNapTimes, napDurations: newNapDurations } = 
+          calculateMultipleTimeOptions(wakeUpTime, deficitLevel);
         
         setDeepWorkPeriods(newDeepWorkPeriods);
-        setAfternoonSlump(newAfternoonSlump);
-        setNapTime(newNapTime);
-        
-        // Calculate nap duration
-        const napTimeDate = new Date(wakeUpTime);
-        const napHours = new Date(napTimeDate.getTime() + 6.5 * 60 * 60 * 1000).getHours();
-        const napMins = new Date(napTimeDate.getTime() + 6.5 * 60 * 60 * 1000).getMinutes();
-        const napDateTime = new Date();
-        napDateTime.setHours(napHours);
-        napDateTime.setMinutes(napMins);
-        setNapDuration(getIdealNapDuration(napDateTime));
+        setEnergyDips(newEnergyDips);
+        setNapTimes(newNapTimes);
+        setNapDurations(newNapDurations);
         
         // Generate personalized recommendation if chronotype is known
         if (chronotype !== 'unknown') {
           const recommendation = getPersonalizedSleepRecommendation(
             chronotype as Chronotype, 
             ageRange, 
-            newBedtimes
+            adjustedBedtimes
           );
           setPersonalRecommendation(recommendation);
         } else {
@@ -199,14 +439,20 @@ export default function SleepCalculator() {
       
       // Simulate a loading delay for better UX
       setTimeout(() => {
-        const newWakeUpTimes = calculateWakeUpTimes(bedTime);
-        setWakeUpTimes(newWakeUpTimes);
+        // Calculate all possible wake-up times
+        const allWakeUpTimes = calculateWakeUpTimes(bedTime);
+        
+        // Adjust wake times based on chronotype
+        const adjustedWakeUpTimes = chronotype !== 'unknown' ? 
+          adjustTimesForChronotype(allWakeUpTimes, chronotype) : allWakeUpTimes;
+        
+        setWakeUpTimes(adjustedWakeUpTimes);
         
         // Calculate sleep durations and cycles for each wake-up time
         const durations: string[] = [];
         const cycles: number[] = [];
         
-        newWakeUpTimes.forEach((wakeTimeStr) => {
+        adjustedWakeUpTimes.forEach((wakeTimeStr) => {
           const duration = calculateSleepDuration(bedTime, wakeTimeStr);
           durations.push(duration);
           
@@ -217,8 +463,25 @@ export default function SleepCalculator() {
         setWakeUpSleepDurations(durations);
         setWakeUpSleepCycles(cycles);
         
-        // Get the best wake up time
-        const best = getBestWakeTime(bedTime);
+        // Check sleep deficit level (use first wake time which has most cycles)
+        const deficitLevel = checkSleepDeficiency(durations[0], ageRange);
+        setSleepDeficitLevel(deficitLevel);
+        
+        // Get the best wake up time (accounting for chronotype)
+        let best = getBestWakeTime(bedTime);
+        if (chronotype === 'early') {
+          // For early types, select an earlier best time if possible
+          const bestTimeDate = timeStringToDate(best);
+          const earlierTime = new Date(bestTimeDate);
+          earlierTime.setMinutes(earlierTime.getMinutes() - 90); // One cycle earlier
+          best = formatTime(earlierTime);
+        } else if (chronotype === 'late') {
+          // For late types, select a later best time if possible
+          const bestTimeDate = timeStringToDate(best);
+          const laterTime = new Date(bestTimeDate);
+          laterTime.setMinutes(laterTime.getMinutes() + 90); // One cycle later
+          best = formatTime(laterTime);
+        }
         setBestWakeUpTime(best);
         
         // Calculate productivity periods based on the best wake-up time
@@ -226,28 +489,22 @@ export default function SleepCalculator() {
         
         // Calculate productivity periods based on best wake time
         const newDeepWorkPeriods = calculateDeepWorkPeriods(bestWakeTimeDate);
-        const newAfternoonSlump = calculateAfternoonSlump(bestWakeTimeDate);
-        const newNapTime = calculateNapTime(bestWakeTimeDate);
+        
+        // Calculate multiple energy dips and nap times
+        const { energyDips: newEnergyDips, napTimes: newNapTimes, napDurations: newNapDurations } = 
+          calculateMultipleTimeOptions(bestWakeTimeDate, deficitLevel);
         
         setDeepWorkPeriods(newDeepWorkPeriods);
-        setAfternoonSlump(newAfternoonSlump);
-        setNapTime(newNapTime);
-        
-        // Calculate nap duration
-        const napTimeDate = new Date(bestWakeTimeDate);
-        const napHours = new Date(napTimeDate.getTime() + 6.5 * 60 * 60 * 1000).getHours();
-        const napMins = new Date(napTimeDate.getTime() + 6.5 * 60 * 60 * 1000).getMinutes();
-        const napDateTime = new Date();
-        napDateTime.setHours(napHours);
-        napDateTime.setMinutes(napMins);
-        setNapDuration(getIdealNapDuration(napDateTime));
+        setEnergyDips(newEnergyDips);
+        setNapTimes(newNapTimes);
+        setNapDurations(newNapDurations);
         
         // Generate personalized recommendation if chronotype is known
         if (chronotype !== 'unknown') {
           const recommendation = getPersonalizedSleepRecommendation(
             chronotype as Chronotype, 
             ageRange, 
-            newWakeUpTimes
+            adjustedWakeUpTimes
           );
           setPersonalRecommendation(recommendation);
         } else {
@@ -273,9 +530,9 @@ export default function SleepCalculator() {
     setBedtimes([]);
     setWakeUpTimes([]);
     setDeepWorkPeriods([]);
-    setAfternoonSlump('');
-    setNapTime('');
-    setNapDuration('');
+    setEnergyDips([]);
+    setNapTimes([]);
+    setNapDurations([]);
     setBestWakeUpTime('');
     setSleepDurations([]);
     setSleepCycles([]);
@@ -285,6 +542,7 @@ export default function SleepCalculator() {
     setSelectedBedTimeIndex(null);
     setSelectedWakeTimeIndex(null);
     setSelectedTime(null);
+    setSleepDeficitLevel('none');
   };
   
   // Handle when a wake time is selected (from bedToWake mode)
@@ -300,20 +558,20 @@ export default function SleepCalculator() {
     
     // Calculate new productivity periods based on this wake-up time
     const newDeepWorkPeriods = calculateDeepWorkPeriods(selectedWakeTime);
-    const newAfternoonSlump = calculateAfternoonSlump(selectedWakeTime);
-    const newNapTime = calculateNapTime(selectedWakeTime);
+    
+    // Check sleep deficit level with this selection
+    const deficitLevel = checkSleepDeficiency(wakeUpSleepDurations[index], ageRange);
+    setSleepDeficitLevel(deficitLevel);
+    
+    // Calculate multiple energy dips and nap times based on new wake time
+    const { energyDips: newEnergyDips, napTimes: newNapTimes, napDurations: newNapDurations } = 
+      calculateMultipleTimeOptions(selectedWakeTime, deficitLevel);
     
     // Force a direct state update
     setDeepWorkPeriods([...newDeepWorkPeriods]);
-    setAfternoonSlump(newAfternoonSlump);
-    setNapTime(newNapTime);
-    
-    // Calculate nap duration
-    const napTimeDate = new Date(selectedWakeTime);
-    const napDateTime = new Date();
-    napDateTime.setHours(napTimeDate.getHours() + 6);
-    napDateTime.setMinutes(napTimeDate.getMinutes() + 30);
-    setNapDuration(getIdealNapDuration(napDateTime));
+    setEnergyDips(newEnergyDips);
+    setNapTimes(newNapTimes);
+    setNapDurations(newNapDurations);
     
     // If we're in bedToWake mode and have a chronotype
     if (calculationType === 'bedToWake' && chronotype !== 'unknown') {
@@ -337,6 +595,10 @@ export default function SleepCalculator() {
     
     const selectedBedTime = timeStringToDate(time);
     
+    // Check sleep deficit level with this selection
+    const deficitLevel = checkSleepDeficiency(sleepDurations[index], ageRange);
+    setSleepDeficitLevel(deficitLevel);
+    
     // For wakeToBed mode, we need to simulate what the wake-up time would be
     // if the user went to bed at this time
     if (calculationType === 'wakeToBed') {
@@ -347,20 +609,16 @@ export default function SleepCalculator() {
       
       // Calculate new productivity periods based on this simulated wake-up time
       const newDeepWorkPeriods = calculateDeepWorkPeriods(simulatedWakeUpDate);
-      const newAfternoonSlump = calculateAfternoonSlump(simulatedWakeUpDate);
-      const newNapTime = calculateNapTime(simulatedWakeUpDate);
+      
+      // Calculate multiple energy dips and nap times based on simulated wake up time
+      const { energyDips: newEnergyDips, napTimes: newNapTimes, napDurations: newNapDurations } = 
+        calculateMultipleTimeOptions(simulatedWakeUpDate, deficitLevel);
       
       // Force a direct state update
       setDeepWorkPeriods([...newDeepWorkPeriods]);
-      setAfternoonSlump(newAfternoonSlump);
-      setNapTime(newNapTime);
-      
-      // Calculate nap duration
-      const napTimeDate = new Date(simulatedWakeUpDate);
-      const napDateTime = new Date();
-      napDateTime.setHours(napTimeDate.getHours() + 6);
-      napDateTime.setMinutes(napTimeDate.getMinutes() + 30);
-      setNapDuration(getIdealNapDuration(napDateTime));
+      setEnergyDips(newEnergyDips);
+      setNapTimes(newNapTimes);
+      setNapDurations(newNapDurations);
       
       // Update personalized recommendation if chronotype is known
       if (chronotype !== 'unknown') {
@@ -378,6 +636,20 @@ export default function SleepCalculator() {
   const chronotypeRecommendation = chronotype !== 'unknown' 
     ? getChronotypeRecommendation(chronotype as Chronotype) 
     : '';
+  
+  // Get deficit message based on level
+  const getDeficitMessage = (level: SleepDeficitLevel) => {
+    switch(level) {
+      case 'mild':
+        return "You'll get slightly less than the ideal amount of sleep. Consider a short nap to compensate.";
+      case 'moderate':
+        return "With this schedule, you'll get less than the recommended sleep for your age group. Additional nap times are recommended to help you stay alert.";
+      case 'severe':
+        return "This schedule results in significant sleep deprivation. Multiple strategic naps are strongly recommended, including a 90-minute full-cycle nap if possible.";
+      default:
+        return "";
+    }
+  };
   
   return (
     <div className="sleep-calculator-container">
@@ -509,6 +781,22 @@ export default function SleepCalculator() {
               </div>
             )}
             
+            {/* Sleep Deficiency Warning */}
+            {(sleepDeficitLevel !== 'none') && selectedTime && (
+              <div className={`card-cosmic p-3 md:p-4 rounded-xl shadow-sm border-${sleepDeficitLevel === 'severe' ? 'red' : 'amber'}-500/20 bg-${sleepDeficitLevel === 'severe' ? 'red' : 'amber'}-900/10`}>
+                <div className="flex items-start space-x-3">
+                  <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 text-${sleepDeficitLevel === 'severe' ? 'red' : 'amber'}-400`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                  <div>
+                    <p className={`text-sm text-${sleepDeficitLevel === 'severe' ? 'red' : 'amber'}-200`}>
+                      <span className="font-medium">Sleep Alert:</span> {getDeficitMessage(sleepDeficitLevel)}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+            
             {/* Bedtime Results */}
             {bedtimes.length > 0 && (
               <SleepResults 
@@ -547,24 +835,28 @@ export default function SleepCalculator() {
               />
             )}
             
-            {/* Afternoon Slump */}
-            {afternoonSlump && (
+            {/* Energy Dips */}
+            {energyDips.length > 0 && (
               <SleepResults 
-                title="Afternoon Energy Dip"
-                items={[afternoonSlump]}
+                title="Energy Dip Periods"
+                items={energyDips}
                 icon={<Icons.Slump />}
                 accent="blue"
+                description="These are times when your body naturally experiences energy dips due to circadian rhythm fluctuations."
               />
             )}
             
-            {/* Optimal Nap Time */}
-            {napTime && (
+            {/* Optimal Nap Times */}
+            {napTimes.length > 0 && (
               <SleepResults 
-                title="Optimal Nap Time"
-                items={[napTime]}
-                description={`Recommended nap duration: ${napDuration}`}
+                title="Optimal Nap Times"
+                items={napTimes}
                 icon={<Icons.Nap />}
                 accent="cyan"
+                description={sleepDeficitLevel !== 'none' 
+                  ? "Strategic nap recommendations to compensate for sleep deficit. 90-minute naps complete a full sleep cycle including REM sleep." 
+                  : "Scientifically-timed nap options to boost alertness and cognitive performance."}
+                extraInfo={napDurations}
               />
             )}
             
