@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface SleepResultsProps {
   title: string;
@@ -13,8 +13,6 @@ interface SleepResultsProps {
   cycles?: number[];
   selectedIndex?: number | null;
   extraInfo?: string[];
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  bestWakeUpTime?: string;
 }
 
 export default function SleepResults({ 
@@ -28,16 +26,41 @@ export default function SleepResults({
   sleepDurations = [],
   cycles = [],
   selectedIndex = null,
-  extraInfo = [],
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  bestWakeUpTime,
+  extraInfo = []
 }: SleepResultsProps) {
   const [expanded, setExpanded] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
   
-  // Handle selection for both click and touch events
-  const handleSelect = (item: string, index: number) => {
+  // Detect mobile device on component mount
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => {
+      window.removeEventListener('resize', checkMobile);
+    };
+  }, []);
+  
+  // Process selection
+  const handleSelect = (item: string, index: number, event?: React.MouseEvent | React.TouchEvent) => {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    
     if (onSelect) {
-      onSelect(item, index);
+      // Delay slightly on mobile to ensure UI updates properly
+      if (isMobile) {
+        setTimeout(() => {
+          onSelect(item, index);
+        }, 50);
+      } else {
+        onSelect(item, index);
+      }
     }
   };
   
@@ -90,12 +113,25 @@ export default function SleepResults({
                   className={`sleep-results-item ${
                     onSelect ? 'cursor-pointer transition-all hover:bg-violet-500/20 hover:shadow-md hover:translate-y-0' : ''
                   } ${isSelected ? 'bg-violet-500/30 border-violet-500/50 shadow-md transform -translate-y-px' : ''}`}
-                  onClick={() => handleSelect(item, index)}
-                  onTouchStart={(e) => e.stopPropagation()}
+                  data-index={index} /* Add data attribute for easier selection */
+                  onClick={(e) => onSelect && handleSelect(item, index, e)}
+                  onTouchStart={(e) => {
+                    if (onSelect) {
+                      // Mark this element as being touched for the touchend handler
+                      (e.currentTarget as HTMLElement).dataset.touched = "true";
+                      e.stopPropagation();
+                    }
+                  }}
                   onTouchEnd={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleSelect(item, index);
+                    if (onSelect && (e.currentTarget as HTMLElement).dataset.touched === "true") {
+                      // Clean up the touched flag
+                      delete (e.currentTarget as HTMLElement).dataset.touched;
+                      handleSelect(item, index, e);
+                    }
+                  }}
+                  onTouchCancel={(e) => {
+                    // Clean up the touched flag if the touch is canceled
+                    delete (e.currentTarget as HTMLElement).dataset.touched;
                   }}
                   role={onSelect ? "button" : undefined}
                   tabIndex={onSelect ? 0 : undefined}
