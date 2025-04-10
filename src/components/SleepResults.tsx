@@ -119,25 +119,25 @@ export default function SleepResults({
   if (items.length === 0) return null;
   
   return (
-    <div className={`sleep-results-card border-${accent}-500/20`}>
+    <div className={`backdrop-blur-sm mb-8 border-${accent}-500/20`}>
       <div 
-        className={`sleep-results-header bg-${accent}-500/05 hover:bg-${accent}-500/10`}
+        className={`flex items-center justify-between p-5 md:p-6 hover:bg-${accent}-500/10`}
         onClick={toggleExpanded}
       >
         <div className="flex items-center gap-3">
-          {icon && <span className="text-xl glow-icon">{icon}</span>}
-          <h3 className="sleep-results-title">
+          {icon && <span className="text-2xl glow-icon">{icon}</span>}
+          <h3 className="text-2xl md:text-3xl font-semibold text-gradient-cosmic">
             {title}
           </h3>
         </div>
         
         <button 
-          className="p-1 rounded-full hover:bg-violet-500/10 transition-colors"
+          className="p-2 rounded-full hover:bg-violet-500/10 transition-colors"
           aria-label={isExpanded ? "Collapse" : "Expand"}
         >
           <svg 
             xmlns="http://www.w3.org/2000/svg" 
-            className={`h-5 w-5 text-violet-300 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} 
+            className={`h-7 w-7 text-blue-300 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} 
             fill="none" 
             viewBox="0 0 24 24" 
             stroke="currentColor"
@@ -148,23 +148,23 @@ export default function SleepResults({
       </div>
       
       {isExpanded && (
-        <div className="sleep-results-body">
+        <div className="p-5 md:p-6">
           {description && (
-            <p className="sleep-results-description">
+            <p className="text-lg md:text-xl text-indigo-200 mb-6">
               {description}
             </p>
           )}
           
-          <ul className="space-y-2.5">
+          <ul className="space-y-4">
             {items.map((item, index) => {
               const isSelected = selectedIndex === index;
               
               return (
                 <li 
                   key={index}
-                  className={`sleep-results-item ${
-                    onSelect ? 'cursor-pointer transition-all hover:bg-violet-500/20 hover:shadow-md hover:translate-y-0' : ''
-                  } ${isSelected ? 'bg-violet-500/30 border-violet-500/50 shadow-md transform -translate-y-px' : ''}`}
+                  className={`flex flex-col md:flex-row md:items-center justify-between p-5 md:p-6 backdrop-blur-sm rounded-lg mb-2 ${
+                    onSelect ? 'cursor-pointer transition-all hover:bg-blue-500/20 hover:shadow-md hover:translate-y-0' : ''
+                  } ${isSelected ? 'bg-blue-500/30 border-blue-500/50 shadow-md transform -translate-y-px' : ''}`}
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
@@ -189,10 +189,10 @@ export default function SleepResults({
                   }}
                 >
                   <div className="flex flex-col md:flex-row md:items-center md:gap-4 flex-grow">
-                    <span className={`sleep-results-time ${isSelected ? 'text-white font-semibold' : 'text-violet-100'}`}>
+                    <span className={`text-xl md:text-2xl ${isSelected ? 'text-white font-semibold' : 'text-blue-100'}`}>
                       {item}
                       {isSelected && (
-                        <span className="ml-2 text-xs font-normal bg-violet-500/40 px-1.5 py-0.5 rounded-full">
+                        <span className="ml-2 text-sm font-normal bg-blue-500/40 px-2 py-0.5 rounded-full">
                           Selected
                         </span>
                       )}
@@ -201,8 +201,8 @@ export default function SleepResults({
                     <div className="sleep-results-badges">
                       {/* Nap duration info (for nap times) */}
                       {extraInfo[index] && (
-                        <span className="sleep-results-badge">
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <span className="inline-flex items-center px-3 py-1.5 rounded-lg bg-blue-600/20 border border-blue-500/30 text-base">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                           </svg>
                           <span className="badge-text">{getShorterNapInfo(extraInfo[index])}</span>
@@ -211,8 +211,8 @@ export default function SleepResults({
                       
                       {/* Sleep duration (for bedtimes/wake times) */}
                       {sleepDurations[index] && (
-                        <span className="sleep-results-badge">
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <span className="inline-flex items-center px-3 py-1.5 rounded-lg bg-blue-600/20 border border-blue-500/30 text-base">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                           </svg>
                           <span className="badge-text">{getAbbreviatedDuration(sleepDurations[index])}</span>
@@ -221,8 +221,8 @@ export default function SleepResults({
                       
                       {/* Sleep cycles (for bedtimes/wake times) */}
                       {cycles[index] && (
-                        <span className="sleep-results-badge">
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <span className="inline-flex items-center px-3 py-1.5 rounded-lg bg-blue-600/20 border border-blue-500/30 text-base">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                           </svg>
                           <span className="badge-text">{cycles[index]} {isMobile ? 'cycle' : `sleep ${cycles[index] === 1 ? 'cycle' : 'cycles'}`}</span>
@@ -235,7 +235,7 @@ export default function SleepResults({
                     <div className="flex justify-end mt-2 md:mt-0">
                       <svg 
                         xmlns="http://www.w3.org/2000/svg" 
-                        className="h-5 w-5 text-violet-400" 
+                        className="h-6 w-6 text-violet-400" 
                         fill="none" 
                         viewBox="0 0 24 24" 
                         stroke="currentColor"
@@ -249,7 +249,7 @@ export default function SleepResults({
                     <div className="flex justify-end mt-2 md:mt-0">
                       <svg 
                         xmlns="http://www.w3.org/2000/svg" 
-                        className="h-5 w-5 text-violet-200" 
+                        className="h-6 w-6 text-violet-200" 
                         fill="none" 
                         viewBox="0 0 24 24" 
                         stroke="currentColor"

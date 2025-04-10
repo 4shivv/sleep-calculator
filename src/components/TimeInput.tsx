@@ -207,7 +207,7 @@ export default function TimeInput({ label, onTimeChange, placeholder = "12:00 AM
 
   return (
     <div className="time-input-container w-full">
-      <label className="block font-medium text-indigo-200 glow-text mb-2">
+      <label className="block font-medium text-blue-200 glow-text mb-4 text-xl">
         {label}
       </label>
       
@@ -226,13 +226,13 @@ export default function TimeInput({ label, onTimeChange, placeholder = "12:00 AM
             onBlur={() => setIsFocused(false)}
             placeholder={placeholder}
             className={`time-input w-full ${error ? 'border-red-500' : isFocused ? 'border-violet-500 glow-border' : 'border-violet-500/30'} 
-              bg-indigo-950/40 backdrop-blur-md text-white placeholder-indigo-300/70`}
+              bg-indigo-950/40 backdrop-blur-md text-white placeholder-blue-300/70 text-xl py-4`}
           />
           
           <button 
             type="button"
             onClick={() => setShowTimePicker(!showTimePicker)}
-            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-indigo-300 hover:text-violet-300 focus:outline-none p-2"
+            className="absolute right-4 top-1/2 transform -translate-y-1/2 text-blue-300 hover:text-cyan-300 focus:outline-none p-2"
             aria-label="Open time picker"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -245,7 +245,7 @@ export default function TimeInput({ label, onTimeChange, placeholder = "12:00 AM
           <button
             type="button"
             onClick={setCurrentTime}
-            className="btn-secondary px-4 py-3 w-full sm:w-auto flex items-center justify-center gap-2"
+            className="btn-secondary px-5 py-4 w-full sm:w-auto flex items-center justify-center gap-3 text-lg"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -255,7 +255,7 @@ export default function TimeInput({ label, onTimeChange, placeholder = "12:00 AM
         </div>
       </div>
       
-      {error && <p className="text-xs text-red-400 mt-1.5">{error}</p>}
+      {error && <p className="text-base text-red-400 mt-3">{error}</p>}
       
       {/* Time picker dropdown container with fixed height and proper spacing */}
       <div 
@@ -291,7 +291,7 @@ export default function TimeInput({ label, onTimeChange, placeholder = "12:00 AM
                   
                   <div 
                     ref={hourRef}
-                    className="time-control text-center font-bold py-2 text-white w-14 h-14 flex items-center justify-center glow-text"
+                    className="time-control text-center font-bold py-2 text-white w-16 h-16 flex items-center justify-center glow-text text-3xl"
                     onTouchStart={handleTouchStart}
                     onTouchMove={(e) => handleTouchMove(e, 'hour')}
                     onTouchEnd={handleTouchEnd}
@@ -310,7 +310,7 @@ export default function TimeInput({ label, onTimeChange, placeholder = "12:00 AM
                   </button>
                 </div>
                 
-                <div className="time-control font-bold text-white">:</div>
+                <div className="time-control font-bold text-white text-3xl">:</div>
                 
                 {/* Minute selector */}
                 <div className="flex flex-col items-center">
@@ -326,7 +326,7 @@ export default function TimeInput({ label, onTimeChange, placeholder = "12:00 AM
                   
                   <div 
                     ref={minuteRef}
-                    className="time-control text-center font-bold py-2 text-white w-14 h-14 flex items-center justify-center glow-text"
+                    className="time-control text-center font-bold py-2 text-white w-16 h-16 flex items-center justify-center glow-text text-3xl"
                     onTouchStart={handleTouchStart}
                     onTouchMove={(e) => handleTouchMove(e, 'minute')}
                     onTouchEnd={handleTouchEnd}
@@ -348,10 +348,10 @@ export default function TimeInput({ label, onTimeChange, placeholder = "12:00 AM
                 {/* AM/PM toggle */}
                 <button
                   onClick={togglePeriod}
-                  className={`ml-3 px-5 py-3 rounded-xl font-bold focus:outline-none transition-all time-control
+                  className={`ml-3 px-6 py-4 rounded-xl font-bold focus:outline-none transition-all time-control text-xl
                           ${selectedPeriod === 'AM' 
-                           ? 'bg-violet-600 text-white shadow-lg shadow-violet-600/30' 
-                           : 'bg-indigo-800 text-indigo-200'}`}
+                           ? 'bg-cyan-600 text-white shadow-lg shadow-cyan-600/30' 
+                           : 'bg-blue-800 text-blue-200'}`}
                 >
                   {selectedPeriod}
                 </button>

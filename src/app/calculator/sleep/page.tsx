@@ -536,13 +536,13 @@ export default function SleepCalculator() {
               className="btn-secondary mb-4 flex items-center gap-2 self-start"
             >
               <Icons.Back />
-              <span>Back to Home</span>
+              <span className="text-lg">Back to Home</span>
             </button>
             
-            <div className="inline-flex items-center justify-center p-2.5 bg-indigo-900/30 rounded-full mb-3 glow-border">
+            <div className="inline-flex items-center justify-center p-4 bg-indigo-900/30 rounded-full mb-5 glow-border">
               <svg 
                 xmlns="http://www.w3.org/2000/svg" 
-                className="w-7 h-7 sm:w-8 sm:h-8 text-violet-400 glow-icon animate-twinkle" 
+                className="w-10 h-10 sm:w-12 sm:h-12 text-blue-400 glow-icon animate-twinkle" 
                 fill="none" 
                 viewBox="0 0 24 24" 
                 stroke="currentColor"
@@ -555,10 +555,10 @@ export default function SleepCalculator() {
                 />
               </svg>
             </div>
-            <h1 className="text-center glow-text">
+            <h1 className="text-center glow-text text-4xl md:text-5xl font-bold mb-4">
               <span className="text-gradient-cosmic">I want to go to sleep at...</span>
             </h1>
-            <p className="text-indigo-200 max-w-2xl text-center leading-relaxed">
+            <p className="text-blue-200 max-w-2xl text-center leading-relaxed text-xl md:text-2xl">
               Enter your desired bedtime and we'll calculate the optimal wake-up times to ensure you feel refreshed.
             </p>
           </div>
@@ -566,13 +566,13 @@ export default function SleepCalculator() {
         
         <div className="flex flex-col gap-4 md:gap-6 max-w-3xl mx-auto">
           {/* Personal profile */}
-          <div className="card-cosmic p-4 md:p-5 rounded-xl shadow-sm border-violet-500/20">
-            <h3 className="text-lg font-medium text-violet-300 mb-3 md:mb-4 glow-text">Personal Sleep Profile</h3>
+          <div className="backdrop-blur-sm p-6 md:p-8 mb-6">
+            <h3 className="text-2xl font-medium text-blue-300 mb-4 md:mb-6 glow-text">Personal Sleep Profile</h3>
             
             <div className="flex flex-col space-y-4">
               {/* Chronotype Selection */}
               <div>
-                <label className="block text-sm font-medium mb-1.5 text-indigo-200">
+                <label className="block text-lg font-medium mb-3 text-blue-200">
                   Your Chronotype (Sleep-Wake Tendency)
                 </label>
                 <div className="chronotype-selector">
@@ -591,15 +591,15 @@ export default function SleepCalculator() {
                   ))}
                 </div>
                 {chronotypeRecommendation && (
-                  <p className="mt-3 text-sm text-indigo-300">
-                    <span className="font-medium text-violet-300">Chronotype:</span> {chronotypeRecommendation}
+                  <p className="mt-4 text-lg text-blue-300">
+                    <span className="font-medium text-blue-300">Chronotype:</span> {chronotypeRecommendation}
                   </p>
                 )}
               </div>
               
               {/* Age Range Selection */}
               <div>
-                <label className="block text-sm font-medium mb-1.5 text-indigo-200">
+                <label className="block text-lg font-medium mb-3 text-indigo-200">
                   Your Age Range
                 </label>
                 <div className="chronotype-selector">
@@ -617,7 +617,7 @@ export default function SleepCalculator() {
                     </button>
                   ))}
                 </div>
-                <p className="mt-3 text-sm text-indigo-300">
+                <p className="mt-4 text-lg text-indigo-300">
                   <span className="font-medium text-violet-300">Sleep Needs:</span> {getRecommendedSleepDuration(ageRange)} of quality sleep is recommended for your age range.
                 </p>
               </div>
@@ -649,12 +649,12 @@ export default function SleepCalculator() {
             <div className="space-y-4 md:space-y-6 mt-1 md:mt-2">
               {/* Personal Recommendation */}
               {personalRecommendation && (
-                <div className="card-cosmic p-4 md:p-5 rounded-xl shadow-sm border-violet-500/20 bg-gradient-to-br from-indigo-950/80 to-violet-950/80">
+                <div className="backdrop-blur-sm p-6 md:p-8 mb-6 bg-gradient-to-br from-indigo-950/50 to-violet-950/50">
                   <div className="flex items-start space-x-3">
                     <Icons.Recommendation />
                     <div>
-                      <h3 className="text-lg font-medium text-violet-300 mb-2">Your Personalized Recommendation</h3>
-                      <p className="text-indigo-200 text-sm">{personalRecommendation}</p>
+                      <h3 className="text-2xl font-medium text-blue-300 mb-3">Your Personalized Recommendation</h3>
+                      <p className="text-blue-200 text-lg">{personalRecommendation}</p>
                     </div>
                   </div>
                 </div>
@@ -662,13 +662,13 @@ export default function SleepCalculator() {
               
               {/* Sleep Deficiency Warning */}
               {(sleepDeficitLevel !== 'none') && selectedTime && (
-                <div className={`card-cosmic p-3 md:p-4 rounded-xl shadow-sm border-${sleepDeficitLevel === 'severe' ? 'red' : 'amber'}-500/20 bg-${sleepDeficitLevel === 'severe' ? 'red' : 'amber'}-900/10`}>
+                <div className={`backdrop-blur-sm p-5 md:p-6 mb-6 bg-${sleepDeficitLevel === 'severe' ? 'red' : 'amber'}-900/20`}>
                   <div className="flex items-start space-x-3">
                     <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 text-${sleepDeficitLevel === 'severe' ? 'red' : 'amber'}-400`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                     </svg>
                     <div>
-                      <p className={`text-sm text-${sleepDeficitLevel === 'severe' ? 'red' : 'amber'}-200`}>
+                      <p className={`text-lg text-${sleepDeficitLevel === 'severe' ? 'red' : 'amber'}-200`}>
                         <span className="font-medium">Sleep Alert:</span> {getDeficitMessage(sleepDeficitLevel)}
                       </p>
                     </div>
@@ -730,10 +730,10 @@ export default function SleepCalculator() {
               
               {/* Selected Time Note */}
               {selectedTime && (
-                <div className="card-cosmic p-3 md:p-4 rounded-xl shadow-sm border-violet-500/20 bg-violet-900/20">
+                <div className="backdrop-blur-sm p-5 md:p-6 mb-6 bg-violet-900/20">
                   <div>
-                    <p className="text-sm text-indigo-200 mb-2">
-                      <span className="text-violet-300 font-medium">Note:</span> The productivity periods have been updated based on your selected wake-up time ({selectedTime}).
+                    <p className="text-lg text-blue-200 mb-3">
+                      <span className="text-blue-300 font-medium">Note:</span> The productivity periods have been updated based on your selected wake-up time ({selectedTime}).
                     </p>
                   </div>
                 </div>
@@ -755,8 +755,8 @@ export default function SleepCalculator() {
       </div>
       
       <footer className="app-footer">
-        <p>Based on sleep cycle science and circadian rhythm research.</p>
-        <p className="mt-1">© {new Date().getFullYear()} Slumber</p>
+        <p className="text-xl">Based on sleep cycle science and circadian rhythm research.</p>
+        <p className="mt-2 text-lg">© {new Date().getFullYear()} Slumber</p>
       </footer>
     </div>
   );
