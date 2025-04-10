@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Quicksand, Montserrat } from "next/font/google";
 import "./globals.css";
-import StarryBackground from "../components/StarryBackground";
 
 const quicksand = Quicksand({
   subsets: ["latin"],

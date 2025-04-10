@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import StarryBackground from '../../components/StarryBackground';
 
@@ -101,7 +101,7 @@ export default function BlogLanding() {
               </svg>
               <h3 className="text-2xl font-semibold text-blue-300/70 mb-3">More articles coming soon</h3>
               <p className="text-blue-200/70 text-lg max-w-lg mx-auto">
-                We're working on more sleep science content to help you understand and improve your sleep patterns.
+                We&apos;re working on more sleep science content to help you understand and improve your sleep patterns.
               </p>
             </div>
           </div>

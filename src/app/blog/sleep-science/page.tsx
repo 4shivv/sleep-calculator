@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import StarryBackground from '../../../components/StarryBackground';
 
@@ -80,7 +80,7 @@ export default function SleepScienceBlog() {
                   <li>
                     <strong className="text-cyan-200">NREM Stage 1 (5% of total sleep):</strong> Light sleep where you 
                     drift in and out of consciousness. Your muscles relax, breathing and heart rate begin to slow down, 
-                    and brain activity starts to decrease. It's easy to wake from this stage.
+                    and brain activity starts to decrease. It&apos;s easy to wake from this stage.
                   </li>
                   <li>
                     <strong className="text-cyan-200">NREM Stage 2 (45% of total sleep):</strong> A deeper sleep state 
@@ -89,7 +89,7 @@ export default function SleepScienceBlog() {
                   </li>
                   <li>
                     <strong className="text-cyan-200">NREM Stage 3 (25% of total sleep):</strong> This is deep, 
-                    slow-wave sleep that's most difficult to wake from. It's deeply restorative – your body repairs 
+                    slow-wave sleep that&apos;s most difficult to wake from. It&apos;s deeply restorative – your body repairs 
                     tissues, builds bone and muscle, and strengthens the immune system during this stage.
                   </li>
                   <li>
@@ -122,7 +122,7 @@ export default function SleepScienceBlog() {
                 <ul className="science-list text-blue-100 pl-5 space-y-4 text-xl">
                   <li>
                     <strong className="text-cyan-200">Melatonin production:</strong> The pineal gland increases 
-                    melatonin release in the evening when light levels decrease, signaling to your body that it's 
+                    melatonin release in the evening when light levels decrease, signaling to your body that it&apos;s 
                     time to sleep. This hormone helps regulate your sleep-wake timing.
                   </li>
                   <li>
@@ -178,7 +178,7 @@ export default function SleepScienceBlog() {
                     development.
                   </li>
                   <li>
-                    <strong className="text-cyan-200">Quality matters:</strong> Sleep duration alone doesn't 
+                    <strong className="text-cyan-200">Quality matters:</strong> Sleep duration alone doesn&apos;t 
                     determine restfulness. Sleep continuity (minimal disruptions), timing aligned with your circadian 
                     rhythm, and sufficient time in each sleep stage all contribute to restorative sleep.
                   </li>
