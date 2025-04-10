@@ -1,382 +1,226 @@
 'use client';
 
-import { useRef, useEffect } from 'react';
-import * as THREE from 'three';
+import { useEffect, useRef } from 'react';
 
-interface StarryBackgroundProps {
-  starsCount?: number;
-  starColor?: string;
-  backgroundColor?: string;
-  shootingStarsCount?: number;
-  shootingStarSpeed?: number;
-}
-
-export default function StarryBackground({
-  starsCount = 1500,
-  starColor = '#ffffff',
-  backgroundColor = '#050a24',
-  shootingStarsCount = 15,
-  shootingStarSpeed = 0.8
-}: StarryBackgroundProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-
+export default function StarryBackground() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  
   useEffect(() => {
-    if (!containerRef.current) return;
-
-    // Store a reference to the current container element
-    const currentContainer = containerRef.current;
-
-    // Setup scene
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.z = 20;
-
-    // Create renderer
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setClearColor(backgroundColor, 1);
-    renderer.setPixelRatio(window.devicePixelRatio);
-    containerRef.current.appendChild(renderer.domElement);
-
-    // Create stars with different sizes and brightness
-    const createStars = () => {
-      const geometry = new THREE.BufferGeometry();
-      const positions = new Float32Array(starsCount * 3);
-      const sizes = new Float32Array(starsCount);
-      const colors = new Float32Array(starsCount * 3);
-      
-      // Create a color object from starColor prop but don't use it directly
-      // as we'll create unique colors per star below
-      new THREE.Color(starColor);
-      
-      for (let i = 0; i < starsCount; i++) {
-        // Position
-        const i3 = i * 3;
-        positions[i3] = (Math.random() - 0.5) * 200;
-        positions[i3 + 1] = (Math.random() - 0.5) * 200;
-        positions[i3 + 2] = (Math.random() - 0.5) * 200;
-        
-        // Size variation
-        sizes[i] = Math.random() * 1.5 + 0.2;
-        
-        // Color variation (slight blue/purple tints)
-        const brightness = 0.7 + Math.random() * 0.3;
-        const hue = Math.random() * 0.1 + 0.6; // Blue to purple hue range
-        const tempColor = new THREE.Color().setHSL(hue, 0.2, brightness);
-        
-        colors[i3] = tempColor.r;
-        colors[i3 + 1] = tempColor.g;
-        colors[i3 + 2] = tempColor.b;
-      }
-      
-      geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-      geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
-      geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-      
-      // Custom shader material for stars
-      const starsMaterial = new THREE.ShaderMaterial({
-        uniforms: {
-          time: { value: 0 }
-        },
-        vertexShader: `
-          attribute float size;
-          attribute vec3 color;
-          varying vec3 vColor;
-          uniform float time;
-          
-          void main() {
-            vColor = color;
-            vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
-            // Slight twinkling effect based on time
-            float twinkle = sin(time * 0.5 + position.x * 10.0) * 0.2 + 0.8;
-            gl_PointSize = size * twinkle * (300.0 / -mvPosition.z);
-            gl_Position = projectionMatrix * mvPosition;
-          }
-        `,
-        fragmentShader: `
-          varying vec3 vColor;
-          
-          void main() {
-            // Create circular points with soft edges
-            float r = 0.5 * length(2.0 * gl_PointCoord - 1.0);
-            float a = 1.0 - smoothstep(0.5, 1.0, r);
-            gl_FragColor = vec4(vColor, a);
-          }
-        `,
-        transparent: true,
-        blending: THREE.AdditiveBlending,
-        depthWrite: false
-      });
-      
-      return new THREE.Points(geometry, starsMaterial);
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    
+    // Set canvas size to match window
+    const resizeCanvas = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
     };
     
-    // Create shooting stars
-    class ShootingStar {
-      position: THREE.Vector3;
-      velocity: THREE.Vector3;
-      acceleration: THREE.Vector3;
-      length: number;
-      visible: boolean;
-      trailPositions: THREE.Vector3[];
-      maxTrailLength: number;
-      trailLine?: THREE.Line;
-      
-      constructor() {
-        // Start position from a random point at the top half of the screen
-        this.position = new THREE.Vector3(
-          Math.random() * 150 - 75,
-          Math.random() * 50 + 25,
-          Math.random() * 50 - 25
-        );
-        
-        // Direction is always diagonally down
-        this.velocity = new THREE.Vector3(
-          -Math.random() * 3 - 1,
-          -Math.random() * 3 - 1,
-          0
-        );
-        
-        this.acceleration = new THREE.Vector3(0, 0, 0);
-        this.length = Math.random() * 10 + 5;
-        this.visible = true;
-        this.trailPositions = [];
-        this.maxTrailLength = Math.floor(Math.random() * 10) + 20;
-      }
-      
-      update() {
-        // Store current position for trail
-        this.trailPositions.unshift(this.position.clone());
-        
-        // Remove old trail positions
-        if (this.trailPositions.length > this.maxTrailLength) {
-          this.trailPositions.pop();
-        }
-        
-        // Update position
-        this.velocity.add(this.acceleration);
-        this.position.add(this.velocity.clone().multiplyScalar(shootingStarSpeed));
-        
-        // Hide when out of screen
-        if (this.position.x < -100 || this.position.y < -100) {
-          this.visible = false;
-        }
-      }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+    
+    // Star properties
+    interface Star {
+      x: number;
+      y: number;
+      radius: number;
+      opacity: number;
+      speed: number;
+      twinkleSpeed: number;
+      twinkleDirection: number;
+      color: string;
     }
     
-    // Create stars and add to scene
-    const starsMesh = createStars();
-    scene.add(starsMesh);
+    // Shooting star properties
+    interface ShootingStar {
+      x: number;
+      y: number;
+      length: number;
+      speed: number;
+      angle: number;
+      opacity: number;
+      active: boolean;
+      tailOpacity: number;
+      tailLength: number;
+    }
     
-    // Create shooting stars container
-    const shootingStars: ShootingStar[] = [];
-    const shootingStarMaterial = new THREE.LineBasicMaterial({
-      color: 0xffffff,
-      vertexColors: true,
-      blending: THREE.AdditiveBlending,
-      transparent: true
-    });
+    // Create stars
+    const starCount = Math.min(Math.floor(window.innerWidth * window.innerHeight / 5000), 150);
+    const stars: Star[] = [];
     
-    // Nebula background (subtle color variations)
-    const createNebula = () => {
-      const geometry = new THREE.PlaneGeometry(200, 200, 1, 1);
-      const material = new THREE.ShaderMaterial({
-        uniforms: {
-          time: { value: 0 }
-        },
-        vertexShader: `
-          varying vec2 vUv;
-          
-          void main() {
-            vUv = uv;
-            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-          }
-        `,
-        fragmentShader: `
-          varying vec2 vUv;
-          uniform float time;
-          
-          // Simplex noise function
-          vec3 permute(vec3 x) { return mod(((x*34.0)+1.0)*x, 289.0); }
-          
-          float snoise(vec2 v) {
-            const vec4 C = vec4(0.211324865405187, 0.366025403784439,
-                     -0.577350269189626, 0.024390243902439);
-            vec2 i  = floor(v + dot(v, C.yy));
-            vec2 x0 = v - i + dot(i, C.xx);
-            vec2 i1;
-            i1 = (x0.x > x0.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
-            vec4 x12 = x0.xyxy + C.xxzz;
-            x12.xy -= i1;
-            i = mod(i, 289.0);
-            vec3 p = permute(permute(i.y + vec3(0.0, i1.y, 1.0))
-                  + i.x + vec3(0.0, i1.x, 1.0));
-            vec3 m = max(0.5 - vec3(dot(x0, x0), dot(x12.xy, x12.xy),
-                          dot(x12.zw, x12.zw)), 0.0);
-            m = m*m;
-            m = m*m;
-            vec3 x = 2.0 * fract(p * C.www) - 1.0;
-            vec3 h = abs(x) - 0.5;
-            vec3 ox = floor(x + 0.5);
-            vec3 a0 = x - ox;
-            m *= 1.79284291400159 - 0.85373472095314 * (a0*a0 + h*h);
-            vec3 g;
-            g.x = a0.x * x0.x + h.x * x0.y;
-            g.yz = a0.yz * x12.xz + h.yz * x12.yw;
-            return 130.0 * dot(m, g);
-          }
-          
-          void main() {
-            vec2 p = vUv * 2.0 - 1.0;
-            
-            // Multiple noise layers with different scales and movement
-            float n1 = snoise(p * 2.0 + time * 0.02);
-            float n2 = snoise(p * 4.0 - time * 0.01);
-            float n3 = snoise(p * 8.0 + time * 0.03);
-            
-            float finalNoise = n1 * 0.5 + n2 * 0.3 + n3 * 0.2;
-            
-            // Create nebula color
-            vec3 color1 = vec3(0.05, 0.01, 0.20); // Dark blue
-            vec3 color2 = vec3(0.1, 0.02, 0.3);   // Purple
-            vec3 color3 = vec3(0.0, 0.07, 0.2);   // Deep blue
-            
-            // Mix colors based on noise
-            vec3 finalColor = mix(color1, color2, smoothstep(0.2, 0.6, finalNoise));
-            finalColor = mix(finalColor, color3, smoothstep(0.4, 0.8, abs(finalNoise)));
-            
-            // Radial gradient to fade edges
-            float dist = length(p);
-            float alpha = smoothstep(1.0, 0.2, dist) * 0.3;
-            
-            gl_FragColor = vec4(finalColor, alpha);
-          }
-        `,
-        transparent: true,
-        depthWrite: false,
-        side: THREE.DoubleSide
+    // Create color palette of blue and cyan hues
+    const colors = ['rgba(173, 216, 230, 1)', 'rgba(135, 206, 235, 1)', 'rgba(176, 224, 230, 1)', 
+                    'rgba(240, 248, 255, 1)', 'rgba(137, 207, 240, 1)', 'rgba(0, 191, 255, 1)'];
+    
+    for (let i = 0; i < starCount; i++) {
+      stars.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        radius: Math.random() * 1.5 + 0.5,
+        opacity: Math.random() * 0.5 + 0.3,
+        speed: Math.random() * 0.05 + 0.01,
+        twinkleSpeed: Math.random() * 0.015 + 0.005,
+        twinkleDirection: Math.random() > 0.5 ? 1 : -1,
+        color: colors[Math.floor(Math.random() * colors.length)],
       });
-      
-      const nebula = new THREE.Mesh(geometry, material);
-      nebula.position.z = -50;
-      return nebula;
-    };
+    }
     
-    const nebula = createNebula();
-    scene.add(nebula);
+    // Create shooting stars
+    const shootingStars: ShootingStar[] = [];
+    const shootingStarCount = 5;
+    for (let i = 0; i < shootingStarCount; i++) {
+      shootingStars.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height / 2, // Start in upper half
+        length: Math.random() * 80 + 100,
+        speed: Math.random() * 5 + 10,
+        angle: Math.random() * Math.PI / 4 + Math.PI / 4, // 45-90 degree angle
+        opacity: 0,
+        active: false,
+        tailOpacity: 0.7,
+        tailLength: Math.random() * 20 + 30,
+      });
+    }
     
-    // Add subtle fog for depth effect
-    scene.fog = new THREE.FogExp2(backgroundColor, 0.0008);
-
-    // Responsive handling
-    const handleResize = () => {
-      const width = window.innerWidth;
-      const height = window.innerHeight;
-      
-      renderer.setSize(width, height);
-      camera.aspect = width / height;
-      camera.updateProjectionMatrix();
+    // Timing for shooting stars
+    let lastShootingStarTime = Date.now();
+    const getNextShootingStarDelay = () => {
+      // Random delay between 3-10 seconds
+      return Math.random() * 7000 + 3000;
     };
-
-    window.addEventListener('resize', handleResize);
-
-    // Animation variables
-    let frameId: number;
-    let time = 0;
+    let nextShootingStarDelay = getNextShootingStarDelay();
     
     // Animation loop
+    let animationId: number;
+    
     const animate = () => {
-      frameId = requestAnimationFrame(animate);
-      time += 0.01;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
       
-      // Update star twinkling
-      if (starsMesh.material instanceof THREE.ShaderMaterial) {
-        starsMesh.material.uniforms.time.value = time;
+      // Draw gradient background
+      const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      gradient.addColorStop(0, '#0a1128'); // Dark navy blue
+      gradient.addColorStop(0.5, '#0f2557'); // Medium blue
+      gradient.addColorStop(1, '#1a3b72'); // Lighter blue
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      // Check if it's time for a new shooting star
+      const currentTime = Date.now();
+      if (currentTime - lastShootingStarTime > nextShootingStarDelay) {
+        // Activate an inactive shooting star
+        const inactiveStars = shootingStars.filter(star => !star.active);
+        if (inactiveStars.length > 0) {
+          const star = inactiveStars[Math.floor(Math.random() * inactiveStars.length)];
+          // Position at a random point on the left side of the screen
+          star.x = Math.random() * canvas.width / 4;
+          star.y = Math.random() * canvas.height / 3;
+          star.active = true;
+          star.opacity = 1;
+        }
+        
+        lastShootingStarTime = currentTime;
+        nextShootingStarDelay = getNextShootingStarDelay();
       }
       
-      // Update nebula
-      if (nebula.material instanceof THREE.ShaderMaterial) {
-        nebula.material.uniforms.time.value = time;
-      }
-      
-      // Slowly rotate the stars
-      starsMesh.rotation.x += 0.0001;
-      starsMesh.rotation.y += 0.0002;
-      
-      // Randomly create new shooting stars
-      if (Math.random() < 0.03 && shootingStars.length < shootingStarsCount) {
-        shootingStars.push(new ShootingStar());
-      }
-      
-      // Update and draw shooting stars
-      shootingStars.forEach((star, index) => {
-        if (star.visible) {
-          star.update();
+      // Draw and update shooting stars
+      shootingStars.forEach(star => {
+        if (star.active) {
+          // Calculate movement based on angle and speed
+          star.x += Math.cos(star.angle) * star.speed;
+          star.y += Math.sin(star.angle) * star.speed;
           
-          // Create trail geometry
-          if (star.trailPositions.length > 1) {
-            const points = star.trailPositions;
-            const geometry = new THREE.BufferGeometry().setFromPoints(points);
-            
-            // Create colors array with gradient
-            const colors = new Float32Array(points.length * 3);
-            for (let i = 0; i < points.length; i++) {
-              const i3 = i * 3;
-              // Create gradient effect based on position in trail
-              const gradientFactor = 1 - (i / points.length);
-              // Apply gradient effect to colors (could adjust opacity or brightness)
-              const brightness = gradientFactor * 0.7 + 0.3;
-              colors[i3] = brightness;     // R
-              colors[i3 + 1] = brightness; // G
-              colors[i3 + 2] = brightness; // B
-            }
-            
-            geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-            
-            // Remove old trail from scene
-            if (star.trailLine) {
-              scene.remove(star.trailLine);
-              star.trailLine.geometry.dispose();
-            }
-            
-            // Create new trail
-            star.trailLine = new THREE.Line(geometry, shootingStarMaterial);
-            scene.add(star.trailLine);
+          // Create tail gradient
+          const tailX = star.x - Math.cos(star.angle) * star.tailLength;
+          const tailY = star.y - Math.sin(star.angle) * star.tailLength;
+          
+          const tailGradient = ctx.createLinearGradient(
+            star.x, star.y, tailX, tailY
+          );
+          tailGradient.addColorStop(0, `rgba(255, 255, 255, ${star.opacity})`);
+          tailGradient.addColorStop(0.4, `rgba(176, 224, 230, ${star.opacity * 0.6})`);
+          tailGradient.addColorStop(1, `rgba(173, 216, 235, 0)`);
+          
+          // Draw the shooting star
+          ctx.beginPath();
+          ctx.moveTo(star.x, star.y);
+          ctx.lineTo(tailX, tailY);
+          ctx.strokeStyle = tailGradient;
+          ctx.lineWidth = 2;
+          ctx.stroke();
+          
+          // Add a glow at the head
+          ctx.beginPath();
+          ctx.arc(star.x, star.y, 2, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(255, 255, 255, ${star.opacity})`;
+          ctx.fill();
+          
+          // Deactivate if off screen
+          if (
+            star.x > canvas.width + star.tailLength ||
+            star.y > canvas.height + star.tailLength ||
+            star.x < -star.tailLength ||
+            star.y < -star.tailLength
+          ) {
+            star.active = false;
           }
-        } else {
-          // Remove invisible shooting stars
-          if (star.trailLine) {
-            scene.remove(star.trailLine);
-            star.trailLine.geometry.dispose();
-          }
-          shootingStars.splice(index, 1);
         }
       });
       
-      renderer.render(scene, camera);
+      // Draw stars
+      stars.forEach(star => {
+        // Update star position (slight movement)
+        star.y += star.speed;
+        
+        // Reset position if star moves off bottom
+        if (star.y > canvas.height) {
+          star.y = 0;
+          star.x = Math.random() * canvas.width;
+        }
+        
+        // Twinkle effect (opacity change)
+        star.opacity += star.twinkleSpeed * star.twinkleDirection;
+        
+        // Change direction if opacity reaches limits
+        if (star.opacity > 0.9 || star.opacity < 0.3) {
+          star.twinkleDirection *= -1;
+        }
+        
+        // Draw star
+        ctx.beginPath();
+        ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+        
+        // Use the star's color with its opacity
+        const color = star.color.replace('1)', `${star.opacity})`);
+        ctx.fillStyle = color;
+        ctx.fill();
+        
+        // Draw glow effect for brighter stars
+        if (star.radius > 1.2) {
+          ctx.beginPath();
+          ctx.arc(star.x, star.y, star.radius * 2.5, 0, Math.PI * 2);
+          ctx.fillStyle = star.color.replace('1)', `${star.opacity * 0.15})`);
+          ctx.fill();
+        }
+      });
+      
+      animationId = requestAnimationFrame(animate);
     };
-
+    
     animate();
-
-    // Cleanup
+    
+    // Clean up
     return () => {
-      window.removeEventListener('resize', handleResize);
-      cancelAnimationFrame(frameId);
-      
-      // Use the stored reference in the cleanup function
-      if (currentContainer) {
-        currentContainer.removeChild(renderer.domElement);
-      }
-      
-      renderer.dispose();
+      window.removeEventListener('resize', resizeCanvas);
+      cancelAnimationFrame(animationId);
     };
-  }, [starsCount, starColor, backgroundColor, shootingStarsCount, shootingStarSpeed]);
-
+  }, []);
+  
   return (
-    <div 
-      ref={containerRef} 
+    <canvas 
+      ref={canvasRef} 
       className="fixed top-0 left-0 w-full h-full -z-10"
-      aria-hidden="true"
     />
   );
-} 
+}

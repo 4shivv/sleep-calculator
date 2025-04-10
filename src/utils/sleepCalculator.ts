@@ -3,6 +3,7 @@ const SLEEP_CYCLE_MINUTES = 90; // One complete sleep cycle (NREM + REM) lasts a
 const FALL_ASLEEP_TIME_MINUTES = 14; // Average time to fall asleep for healthy adults
 const MIN_SLEEP_CYCLES = 3; // Minimum recommended complete sleep cycles
 const MAX_SLEEP_CYCLES = 6; // Maximum recommended complete sleep cycles
+const WAKE_UP_ADJUSTMENT_MINUTES = 5; // Time to account for transitions between sleep and wakefulness
 
 // Time constants (in minutes)
 const MINUTES_IN_HOUR = 60;
@@ -85,7 +86,8 @@ export function calculateBedtimes(wakeUpTime: Date): string[] {
   // Calculate sleep cycles backward from wake time, starting from MAX (most) to MIN (least)
   for (let cycles = MAX_SLEEP_CYCLES; cycles >= MIN_SLEEP_CYCLES; cycles--) {
     const totalSleepMinutes = cycles * SLEEP_CYCLE_MINUTES;
-    const bedtimeMinutes = wakeupMinutes - totalSleepMinutes - FALL_ASLEEP_TIME_MINUTES;
+    // Subtract wake-up adjustment time to account for transition between sleep and wakefulness
+    const bedtimeMinutes = wakeupMinutes - totalSleepMinutes - FALL_ASLEEP_TIME_MINUTES - WAKE_UP_ADJUSTMENT_MINUTES;
     bedtimes.push(minutesToTimeString(bedtimeMinutes));
   }
   
@@ -103,8 +105,10 @@ export function calculateWakeUpTimes(bedTime: Date): string[] {
   
   // Calculate sleep cycles forward from bed time, starting from MAX (most) to MIN (least)
   for (let cycles = MAX_SLEEP_CYCLES; cycles >= MIN_SLEEP_CYCLES; cycles--) {
+    // Calculate wake-up time including transition time to wakefulness
     const totalSleepMinutes = cycles * SLEEP_CYCLE_MINUTES;
-    const wakeUpMinutes = actualSleepStartMinutes + totalSleepMinutes;
+    // Add the wake-up adjustment time to account for transition between sleep and wakefulness
+    const wakeUpMinutes = actualSleepStartMinutes + totalSleepMinutes + WAKE_UP_ADJUSTMENT_MINUTES;
     wakeUpTimes.push(minutesToTimeString(wakeUpMinutes));
   }
   
@@ -161,8 +165,13 @@ export function calculateSleepDuration(bedTimeStr: string | Date, wakeUpTimeStr:
     sleepMinutes += MINUTES_IN_DAY;
   }
   
-  // Subtract time to fall asleep
-  sleepMinutes -= FALL_ASLEEP_TIME_MINUTES;
+  // Subtract time to fall asleep and add wake-up adjustment
+  sleepMinutes = sleepMinutes - FALL_ASLEEP_TIME_MINUTES - WAKE_UP_ADJUSTMENT_MINUTES;
+  
+  // Make sure sleep minutes is not negative
+  if (sleepMinutes < 0) {
+    sleepMinutes = 0;
+  }
   
   // Format as hours and minutes
   const sleepHours = Math.floor(sleepMinutes / 60);
@@ -224,8 +233,13 @@ export function getSleepCycles(bedTimeStr: string | Date, wakeUpTimeStr: string 
     sleepMinutes += MINUTES_IN_DAY;
   }
   
-  // Subtract time to fall asleep
-  sleepMinutes -= FALL_ASLEEP_TIME_MINUTES;
+  // Subtract time to fall asleep and add wake-up adjustment
+  sleepMinutes = sleepMinutes - FALL_ASLEEP_TIME_MINUTES - WAKE_UP_ADJUSTMENT_MINUTES;
+  
+  // Make sure sleep minutes is not negative
+  if (sleepMinutes < 0) {
+    sleepMinutes = 0;
+  }
   
   // Calculate complete sleep cycles
   const cycles = Math.floor(sleepMinutes / SLEEP_CYCLE_MINUTES);

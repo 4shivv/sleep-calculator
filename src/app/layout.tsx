@@ -1,24 +1,24 @@
 import type { Metadata } from "next";
-import { Space_Grotesk, Crimson_Pro } from "next/font/google";
-import "@fontsource-variable/space-grotesk";
-import "@fontsource-variable/crimson-pro";
+import { Quicksand, Montserrat } from "next/font/google";
 import "./globals.css";
 import StarryBackground from "../components/StarryBackground";
 
-const spaceGrotesk = Space_Grotesk({
+const quicksand = Quicksand({
   subsets: ["latin"],
   display: "swap",
-  variable: "--font-space-grotesk",
+  variable: "--font-quicksand",
+  weight: ["300", "400", "500", "600", "700"],
 });
 
-const crimsonPro = Crimson_Pro({
+const montserrat = Montserrat({
   subsets: ["latin"],
   display: "swap",
-  variable: "--font-crimson-pro",
+  variable: "--font-montserrat",
+  weight: ["300", "400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
-  title: "Sleep Cycle Calculator | Optimize Your Sleep and Productivity",
+  title: "Slumber | Optimize Your Sleep and Productivity",
   description: "Scientific sleep cycle calculator to optimize your sleep schedule, productivity, and deep work times based on your chronotype and circadian rhythm.",
   icons: {
     icon: '/favicon.png',
@@ -26,6 +26,7 @@ export const metadata: Metadata = {
     shortcut: '/favicon.png'
   },
   keywords: [
+    "slumber", 
     "sleep calculator", 
     "sleep cycle", 
     "circadian rhythm", 
@@ -37,23 +38,23 @@ export const metadata: Metadata = {
     "sleep science",
     "wake up time"
   ],
-  authors: [{ name: "Sleep Science Team" }],
+  authors: [{ name: "Slumber Sleep Science Team" }],
   viewport: "width=device-width, initial-scale=1, maximum-scale=5",
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#050a24" },
     { media: "(prefers-color-scheme: dark)", color: "#050a24" }
   ],
-  metadataBase: new URL("https://sleep-calculator.vercel.app"),
+  metadataBase: new URL("https://slumber-app.vercel.app"),
   openGraph: {
-    title: "Sleep Cycle Calculator",
+    title: "Slumber",
     description: "Scientific sleep cycle calculator to optimize your sleep schedule and productivity",
     type: "website",
-    siteName: "Sleep Cycle Calculator",
+    siteName: "Slumber",
     locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Sleep Cycle Calculator",
+    title: "Slumber",
     description: "Scientific sleep cycle calculator to optimize your sleep schedule and productivity",
   },
 };
@@ -73,14 +74,9 @@ export default function RootLayout({
         <meta name="mobile-web-app-capable" content="yes" />
       </head>
       <body
-        className={`${spaceGrotesk.variable} ${crimsonPro.variable} antialiased transition-colors duration-300 cosmic-theme`}
+        className={`${quicksand.variable} ${montserrat.variable} antialiased transition-colors duration-300 cosmic-theme`}
       >
-        <StarryBackground 
-          starsCount={2000} 
-          backgroundColor="#050a24" 
-          shootingStarsCount={15} 
-          shootingStarSpeed={0.8} 
-        />
+        {/* StarryBackground gets added on each page */}
         <div className="bg-gradient-radial-subtle from-indigo-950/20 to-black/80 min-h-screen">
           {children}
         </div>
