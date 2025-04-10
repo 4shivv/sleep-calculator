@@ -497,9 +497,9 @@ export default function WakeUpCalculator() {
   const getDeficitMessage = (level: SleepDeficitLevel) => {
     switch(level) {
       case 'mild':
-        return "You'll get slightly less than the ideal amount of sleep. Consider a short nap to compensate.";
+        return "You&apos;ll get slightly less than the ideal amount of sleep. Consider a short nap to compensate.";
       case 'moderate':
-        return "With this schedule, you'll get less than the recommended sleep for your age group. Additional nap times are recommended to help you stay alert.";
+        return "With this schedule, you&apos;ll get less than the recommended sleep for your age group. Additional nap times are recommended to help you stay alert.";
       case 'severe':
         return "This schedule results in significant sleep deprivation. Multiple strategic naps are strongly recommended, including a 90-minute full-cycle nap if possible.";
       default:

@@ -112,7 +112,7 @@ export default function SleepScienceBlog() {
             <section className="mb-12">
               <h2 className="text-4xl font-semibold text-cyan-300 mb-6">Circadian Rhythm</h2>
               <p className="text-blue-100 mb-6 text-xl">
-                Your circadian rhythm is your body's internal 24-hour clock that regulates your sleep-wake cycle. This 
+                Your circadian rhythm is your body&apos;s internal 24-hour clock that regulates your sleep-wake cycle. This 
                 biological timekeeper influences multiple bodily functions including hormone release, body temperature, 
                 and metabolism.
               </p>
@@ -231,7 +231,7 @@ export default function SleepScienceBlog() {
               
               <p className="text-blue-100 text-xl">
                 Additional research-backed practices include creating a relaxing pre-sleep routine to signal to 
-                your body that it's time to wind down, exercising regularly (but not too close to bedtime), 
+                your body that it&apos;s time to wind down, exercising regularly (but not too close to bedtime), 
                 reserving your bed primarily for sleep to strengthen the association between your bed and 
                 sleepiness, and managing stress through relaxation techniques like deep breathing, meditation, 
                 or progressive muscle relaxation.
@@ -243,7 +243,7 @@ export default function SleepScienceBlog() {
               <h2 className="text-4xl font-semibold text-cyan-300 mb-6">Putting It All Together</h2>
               <p className="text-blue-100 text-xl mb-6">
                 Understanding the science of sleep empowers you to make informed decisions about your sleep habits. 
-                By aligning your sleep schedule with your body's natural cycles, you can optimize both your sleep 
+                By aligning your sleep schedule with your body&apos;s natural cycles, you can optimize both your sleep 
                 quality and your waking performance.
               </p>
               <p className="text-blue-100 text-xl mb-6">
