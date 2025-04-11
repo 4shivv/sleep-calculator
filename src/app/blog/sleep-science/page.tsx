@@ -207,7 +207,7 @@ export default function SleepScienceBlog() {
                 <ul className="science-list text-blue-100 pl-5 space-y-4 text-xl">
                   <li>
                     <strong className="text-cyan-200">Maintain a consistent schedule:</strong> Going to bed and 
-                    waking up at the same times every day (even on weekends) helps regulate your body's internal 
+                    waking up at the same times every day (even on weekends) helps regulate your body&#39;s internal 
                     clock and can improve sleep quality. Consistency reinforces your natural circadian rhythm.
                   </li>
                   <li>
