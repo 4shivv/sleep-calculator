@@ -1,12 +1,12 @@
-# Sleep Cycle Calculator
+# Slumber: Sleep Cycle Calculator
 
-Deployed to https://sleep-calculator-rose.vercel.app/
+Deployed to https://slumber-app.vercel.app/
 
 A scientific web application that helps users optimize their sleep schedule and daily productivity by aligning with natural sleep cycles and circadian rhythms.
 
 ## Project Overview
 
-The Sleep Cycle Calculator is designed to provide users with personalized sleep and productivity recommendations based on scientific research. It aims to enhance users' daily performance by aligning their activities with their natural biological rhythms.
+Slumber is designed to provide users with personalized sleep and productivity recommendations based on scientific research. It aims to enhance users' daily performance by aligning their activities with their natural biological rhythms.
 
 ## Features
 
@@ -22,7 +22,7 @@ The Sleep Cycle Calculator is designed to provide users with personalized sleep 
 
 ## Sleep Science
 
-This calculator is built on evidence-based sleep research:
+Slumber is built on evidence-based sleep research:
 
 - Each sleep cycle consists of NREM and REM stages and lasts approximately 90 minutes
 - The average adult needs 4-6 complete sleep cycles per night (6-9 hours)
@@ -50,8 +50,8 @@ This calculator is built on evidence-based sleep research:
 
 1. Clone the repository
    ```bash
-   git clone https://github.com/yourusername/sleep-calculator.git
-   cd sleep-calculator
+   git clone https://github.com/yourusername/slumber.git
+   cd slumber
    ```
 
 2. Install dependencies
@@ -84,7 +84,7 @@ npm run build
 
 ## Scientific References
 
-This calculator incorporates research from multiple sleep science studies:
+Slumber incorporates research from multiple sleep science studies:
 
 - Circadian timing principles in sleep-wake regulation
 - REM/NREM sleep stage duration and proportions
