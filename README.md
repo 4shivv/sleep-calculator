@@ -1,6 +1,6 @@
 # Slumber: Sleep Cycle Calculator
 
-Deployed to https://slumber-app.vercel.app/
+Deployed to https://slumber-nine.vercel.app/
 
 A scientific web application that helps users optimize their sleep schedule and daily productivity by aligning with natural sleep cycles and circadian rhythms.
 
